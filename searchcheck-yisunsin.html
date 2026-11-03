@@ -1,0 +1,4310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SearchCheck</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --bg-tertiary: #16213e;
+  --bg-card: #1e1e36;
+  --accent: #6c63ff;
+  --accent-hover: #5a52d5;
+  --accent-glow: rgba(108, 99, 255, 0.3);
+  --text-primary: #e8e8f0;
+  --text-secondary: #a0a0b8;
+  --text-muted: #6b6b80;
+  --border: #2a2a45;
+  --success: #4ade80;
+  --error: #f87171;
+  --warning: #fbbf24;
+  --score-high: #4ade80;
+  --score-mid: #fbbf24;
+  --score-low: #f87171;
+  --sidebar-width: 260px;
+}
+
+/* ===== 라이트 테마 ===== */
+[data-theme="light"] {
+  --bg-primary: #f5f5fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eeeef4;
+  --bg-card: #ffffff;
+  --accent: #6c63ff;
+  --accent-hover: #5a52d5;
+  --accent-glow: rgba(108, 99, 255, 0.2);
+  --text-primary: #1a1a2e;
+  --text-secondary: #555570;
+  --text-muted: #8888a0;
+  --border: #d8d8e8;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --score-high: #22c55e;
+  --score-mid: #f59e0b;
+  --score-low: #ef4444;
+}
+
+/* ===== Null 테마 ===== */
+[data-theme="null"] {
+  --bg-primary: transparent;
+  --bg-secondary: rgba(28, 30, 38, 0.78);
+  --bg-tertiary: rgba(44, 48, 56, 0.55);
+  --bg-card: rgba(36, 38, 48, 0.8);
+  --accent: #8b9fba;
+  --accent-hover: #7a8eaa;
+  --accent-glow: rgba(139, 159, 186, 0.2);
+  --text-primary: #dde2ea;
+  --text-secondary: #9aa2b0;
+  --text-muted: #6a7080;
+  --border: rgba(100, 110, 130, 0.3);
+  --success: #6dd4b8;
+  --error: #e8a0a0;
+  --warning: #d4c080;
+  --score-high: #6dd4b8;
+  --score-mid: #d4c080;
+  --score-low: #e8a0a0;
+}
+
+/* Null 배경: 로우폴리 산맥 이미지 */
+[data-theme="null"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDkwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgc2xpY2UiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2I4YzRjZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjM1JSIgc3RvcC1jb2xvcj0iI2MyY2RkNiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjYwJSIgc3RvcC1jb2xvcj0iI2FhYjZjMCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM4YTk0OWUiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgoKICA8IS0tIO2VmOuKmCAtLT4KICA8cmVjdCB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI5MDAiIGZpbGw9InVybCgjc2t5KSIvPgoKICA8IS0tIOyDiCAtLT4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC4zIj4KICAgIDxwYXRoIGQ9Ik02MjAgMTgwIEw2MjUgMTc2IEw2MzAgMTgwIi8+CiAgICA8cGF0aCBkPSJNNjUwIDE5MCBMNjU0IDE4NyBMNjU4IDE5MCIvPgogICAgPHBhdGggZD0iTTkwMCAxNjAgTDkwNSAxNTUgTDkxMCAxNjAiLz4KICAgIDxwYXRoIGQ9Ik04NzAgMTc1IEw4NzQgMTcyIEw4NzggMTc2Ii8+CiAgICA8cGF0aCBkPSJNMTA1MCAxOTUgTDEwNTQgMTkxIEwxMDU4IDE5NSIvPgogIDwvZz4KCiAgPCEtLSDrkqTsqr0g7IKw66elICjqsIDsnqUg7Jew7ZWcIO2ajOyDiSkgLS0+CiAgPGcgb3BhY2l0eT0iMC40NSI+CiAgICA8IS0tIOyZvOyqvSDrkqQg7IKwIC0tPgogICAgPHBvbHlnb24gcG9pbnRzPSI4MCw1MjAgMjAwLDM4MCAzMjAsNTIwIiBmaWxsPSIjYjBiOGMwIi8+CiAgICA8cG9seWdvbiBwb2ludHM9IjIwMCwzODAgMzIwLDUyMCAyNjAsNTIwIiBmaWxsPSIjYTRhZWI2Ii8+CiAgICA8IS0tIOykkeyVmSDrkqQg7YGwIOyCsCAtLT4KICAgIDxwb2x5Z29uIHBvaW50cz0iNTAwLDUyMCA2NTAsMzAwIDc4MCw1MjAiIGZpbGw9IiNhYWI0YmMiLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iNjUwLDMwMCA3ODAsNTIwIDcyMCw0NDAiIGZpbGw9IiM5YWE0YWUiLz4KICAgIDwhLS0g7Jik66W47Kq9IOuSpCDsgrAgLS0+CiAgICA8cG9seWdvbiBwb2ludHM9IjkwMCw1MjAgMTA1MCwzNDAgMTIwMCw1MjAiIGZpbGw9IiNiMGI4YzIiLz4KICAgIDxwb2x5Z29uIHBvaW50cz0iMTA1MCwzNDAgMTIwMCw1MjAgMTEzMCw0NjAiIGZpbGw9IiNhMGFhYjQiLz4KICA8L2c+CgogIDwhLS0g7KSR6rCEIOyCsOunpSAo67Cd7J2AIO2ajOyDiSAtIOuhnOyasO2PtOumrCkgLS0+CiAgPCEtLSDsmbzsqr0g7KSR6rCEIOyCsOq1sCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjAsNjIwIDEyMCw0NDAgMjQwLDU0MCAxODAsNjIwIiBmaWxsPSIjYzBjOGQwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIxMjAsNDQwIDI0MCw1NDAgMjAwLDQ4MCIgZmlsbD0iI2E4YjJiYSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTIwLDQ0MCAyMDAsNDgwIDE2MCw0NjAiIGZpbGw9IiNiOGMwYzgiLz4KCiAgPHBvbHlnb24gcG9pbnRzPSIxODAsNjIwIDI0MCw1NDAgMzUwLDQ2MCA0MjAsNTgwIDM2MCw2MjAiIGZpbGw9IiNiMGI4YzIiLz4KICA8cG9seWdvbiBwb2ludHM9IjI0MCw1NDAgMzUwLDQ2MCAzMTAsNTAwIiBmaWxsPSIjOThhMmFjIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIzNTAsNDYwIDQyMCw1ODAgNDAwLDUyMCIgZmlsbD0iI2EwYWFiNCIvPgoKICA8IS0tIOykkeyVmSDtgbAg67SJ7Jqw66asICjrqZTsnbgpIC0tPgogIDxwb2x5Z29uIHBvaW50cz0iNDgwLDYyMCA2MjAsMzQwIDcwMCw0ODAgNjYwLDYyMCIgZmlsbD0iI2QwZDRkYSIvPgogIDxwb2x5Z29uIHBvaW50cz0iNjIwLDM0MCA3MDAsNDgwIDY4MCw0MDAiIGZpbGw9IiNiMGI2YmUiLz4KICA8cG9seWdvbiBwb2ludHM9IjYyMCwzNDAgNjgwLDQwMCA2NDAsMzcwIiBmaWxsPSIjYzRjOGQwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI2MjAsMzQwIDU2MCw0MjAgNDgwLDYyMCIgZmlsbD0iI2I4YmNjNCIvPgogIDxwb2x5Z29uIHBvaW50cz0iNTYwLDQyMCA0ODAsNjIwIDUyMCw1NDAiIGZpbGw9IiNhOGFlYjYiLz4KCiAgPCEtLSDspJHslZkg7Jik66W47Kq9IOu0ieyasOumrCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjY2MCw2MjAgNzIwLDQyMCA4MzAsNTIwIDgwMCw2MjAiIGZpbGw9IiNjOGNjZDQiLz4KICA8cG9seWdvbiBwb2ludHM9IjcyMCw0MjAgODMwLDUyMCA3OTAsNDYwIiBmaWxsPSIjYTRhYWIyIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI3MjAsNDIwIDc5MCw0NjAgNzUwLDQ0MCIgZmlsbD0iI2I0YmFjMiIvPgogIDxwb2x5Z29uIHBvaW50cz0iNzIwLDQyMCA2ODAsNDgwIDY2MCw2MjAiIGZpbGw9IiNhZWI0YmMiLz4KCiAgPCEtLSDsmKTrpbjsqr0g7IKw6rWwIC0tPgogIDxwb2x5Z29uIHBvaW50cz0iODAwLDYyMCA5MDAsNDMwIDEwMDAsNTQwIDk2MCw2MjAiIGZpbGw9IiNiY2MyY2EiLz4KICA8cG9seWdvbiBwb2ludHM9IjkwMCw0MzAgMTAwMCw1NDAgOTYwLDQ4MCIgZmlsbD0iI2EwYThiMCIvPgogIDxwb2x5Z29uIHBvaW50cz0iOTAwLDQzMCA5NjAsNDgwIDkzMCw0NTAiIGZpbGw9IiNiMGI2YmUiLz4KCiAgPHBvbHlnb24gcG9pbnRzPSI5NjAsNjIwIDEwNDAsNDYwIDExNjAsNTUwIDExMjAsNjIwIiBmaWxsPSIjYzRjYWQwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIxMDQwLDQ2MCAxMTYwLDU1MCAxMTAwLDUwMCIgZmlsbD0iIzljYTRhZSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTA0MCw0NjAgMTEwMCw1MDAgMTA3MCw0NzUiIGZpbGw9IiNiNGJhYzAiLz4KCiAgPCEtLSDqsIDsnqUg7Jik66W47Kq9IC0tPgogIDxwb2x5Z29uIHBvaW50cz0iMTEyMCw2MjAgMTI0MCw0MDAgMTM4MCw1NDAgMTM0MCw2MjAiIGZpbGw9IiNkMGQ2ZGMiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDAsNDAwIDEzODAsNTQwIDEzMjAsNDYwIiBmaWxsPSIjYWFiMGI4Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSIxMjQwLDQwMCAxMzIwLDQ2MCAxMjgwLDQzMCIgZmlsbD0iI2MwYzZjYyIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTI0MCw0MDAgMTE4MCw0ODAgMTEyMCw2MjAiIGZpbGw9IiNiNGJhYzIiLz4KCiAgPHBvbHlnb24gcG9pbnRzPSIxMzQwLDYyMCAxNDAwLDUwMCAxNDQwLDU2MCAxNDQwLDYyMCIgZmlsbD0iI2I4YzBjOCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTQwMCw1MDAgMTQ0MCw1NjAgMTQ0MCw1MjAiIGZpbGw9IiNhNGFhYjIiLz4KCiAgPCEtLSDslZ7sqr0g7IKw66elICjslrTrkZDsmrQg7ZqM7IOJIC0g66Gc7Jqw7Y+066asKSAtLT4KICA8IS0tIOyZvOyqvSDslZ4gLS0+CiAgPHBvbHlnb24gcG9pbnRzPSIwLDkwMCAwLDYyMCAxMDAsNTYwIDIwMCw2MjAgMTYwLDcwMCAwLDc1MCIgZmlsbD0iIzNhM2U0NCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMCw2MjAgMTAwLDU2MCA2MCw1ODAiIGZpbGw9IiM0YTRlNTQiLz4KICA8cG9seWdvbiBwb2ludHM9IjEwMCw1NjAgMjAwLDYyMCAxNjAsNTgwIiBmaWxsPSIjNDQ0ODUwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIyMDAsNjIwIDMwMCw1ODAgMzgwLDY0MCAzMjAsNzAwIiBmaWxsPSIjMzYzYTQwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIzMDAsNTgwIDM4MCw2NDAgMzUwLDYwMCIgZmlsbD0iIzQyNDY1MCIvPgoKICA8IS0tIOyVniDspJHslZkg7Jm87Kq9IC0tPgogIDxwb2x5Z29uIHBvaW50cz0iMjgwLDkwMCAzMjAsNzAwIDQ0MCw2MDAgNTIwLDY4MCA0ODAsOTAwIiBmaWxsPSIjMmUzMjM4Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSIzMjAsNzAwIDQ0MCw2MDAgNDAwLDY0MCIgZmlsbD0iIzNjNDA0OCIvPgogIDxwb2x5Z29uIHBvaW50cz0iNDQwLDYwMCA1MjAsNjgwIDQ5MCw2MzAiIGZpbGw9IiMzNDM4NDAiLz4KCiAgPCEtLSDslZ4g7KSR7JWZIC0tPgogIDxwb2x5Z29uIHBvaW50cz0iNDgwLDkwMCA1MjAsNjgwIDYwMCw2MjAgNjgwLDcwMCA2NjAsOTAwIiBmaWxsPSIjMjgyYzMyIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI1MjAsNjgwIDYwMCw2MjAgNTcwLDY1MCIgZmlsbD0iIzNhM2U0NiIvPgogIDxwb2x5Z29uIHBvaW50cz0iNjAwLDYyMCA2ODAsNzAwIDY1MCw2NjAiIGZpbGw9IiMzMjM2NDAiLz4KCiAgPCEtLSDslZ4g7KSR7JWZIOyYpOuluOyqvSAtLT4KICA8cG9seWdvbiBwb2ludHM9IjY2MCw5MDAgNjgwLDcwMCA3ODAsNjQwIDg2MCw3MjAgODMwLDkwMCIgZmlsbD0iIzJhMmUzNCIvPgogIDxwb2x5Z29uIHBvaW50cz0iNjgwLDcwMCA3ODAsNjQwIDc0MCw2NjAiIGZpbGw9IiMzODNjNDQiLz4KICA8cG9seWdvbiBwb2ludHM9Ijc4MCw2NDAgODYwLDcyMCA4MzAsNjcwIiBmaWxsPSIjMzAzNDNjIi8+CgogIDwhLS0g7JWeIOyYpOuluOyqvSAtLT4KICA8cG9seWdvbiBwb2ludHM9IjgzMCw5MDAgODYwLDcyMCA5NjAsNjYwIDEwNjAsNzQwIDEwMjAsOTAwIiBmaWxsPSIjMjYyYTMwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI4NjAsNzIwIDk2MCw2NjAgOTIwLDY4MCIgZmlsbD0iIzM2M2E0MiIvPgogIDxwb2x5Z29uIHBvaW50cz0iOTYwLDY2MCAxMDYwLDc0MCAxMDIwLDY5MCIgZmlsbD0iIzJlMzIzOCIvPgoKICA8cG9seWdvbiBwb2ludHM9IjEwMjAsOTAwIDEwNjAsNzQwIDExODAsNjgwIDEyODAsNzYwIDEyNDAsOTAwIiBmaWxsPSIjMjIyNjMwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIxMDYwLDc0MCAxMTgwLDY4MCAxMTQwLDcwMCIgZmlsbD0iIzM0Mzg0MCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTE4MCw2ODAgMTI4MCw3NjAgMTI0MCw3MTAiIGZpbGw9IiMyYTJlMzYiLz4KCiAgPHBvbHlnb24gcG9pbnRzPSIxMjQwLDkwMCAxMjgwLDc2MCAxMzgwLDcwMCAxNDQwLDc3MCAxNDQwLDkwMCIgZmlsbD0iIzFlMjIyOCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTI4MCw3NjAgMTM4MCw3MDAgMTM0MCw3MjAiIGZpbGw9IiMzMjM2NDAiLz4KICA8cG9seWdvbiBwb2ludHM9IjEzODAsNzAwIDE0NDAsNzcwIDE0NDAsNzMwIiBmaWxsPSIjMjgyYzM0Ii8+CgogIDwhLS0g66eoIOyVniDslrTrkZDsmrQg7KeA66m0IC0tPgogIDxwb2x5Z29uIHBvaW50cz0iMCw3NTAgMTYwLDcwMCAzMjAsNzAwIDQ4MCw5MDAgMCw5MDAiIGZpbGw9IiMxYzFlMjQiLz4KICA8cG9seWdvbiBwb2ludHM9IjE2MCw3MDAgMzIwLDcwMCAyNDAsNzIwIiBmaWxsPSIjMjIyNjMwIi8+CiAgPHBvbHlnb24gcG9pbnRzPSI0ODAsOTAwIDY2MCw5MDAgNjgwLDcwMCA1MjAsNjgwIDMyMCw3MDAiIGZpbGw9IiMxYTFjMjIiLz4KICA8cG9seWdvbiBwb2ludHM9IjY2MCw5MDAgODMwLDkwMCA4NjAsNzIwIDY4MCw3MDAiIGZpbGw9IiMxODFhMjAiLz4KICA8cG9seWdvbiBwb2ludHM9IjgzMCw5MDAgMTAyMCw5MDAgMTA2MCw3NDAgODYwLDcyMCIgZmlsbD0iIzE2MWExZSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTAyMCw5MDAgMTI0MCw5MDAgMTI4MCw3NjAgMTA2MCw3NDAiIGZpbGw9IiMxNDE2MWMiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDAsOTAwIDE0NDAsOTAwIDE0NDAsNzcwIDEyODAsNzYwIiBmaWxsPSIjMTIxNDFhIi8+Cjwvc3ZnPg==') no-repeat center center / cover;
+}
+
+[data-theme="null"] body::after {
+  content: none;
+}
+
+/* Null: 사이드바 글래스 */
+[data-theme="null"] #sidebar {
+  background: rgba(35, 37, 48, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right-color: rgba(120, 118, 140, 0.2);
+}
+
+/* Null: 메인 컨텐츠 글래스 */
+[data-theme="null"] #main-content {
+  background: rgba(50, 52, 66, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Null: 카드 글래스 */
+[data-theme="null"] .settings-card,
+[data-theme="null"] .result-card,
+[data-theme="null"] .loading-card,
+[data-theme="null"] .ai-summary {
+  background: rgba(48, 50, 65, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(120, 118, 140, 0.25);
+}
+
+/* Null: 입력 필드 */
+[data-theme="null"] .settings-input,
+[data-theme="null"] .search-box,
+[data-theme="null"] .standalone-chat-input-box {
+  background: rgba(30, 32, 44, 0.65);
+  border-color: rgba(120, 118, 140, 0.3);
+}
+
+/* Null: 검색 히어로 배경 투명 */
+[data-theme="null"] .search-hero {
+  background: transparent;
+}
+
+/* Null: 브라우저 툴바 */
+[data-theme="null"] .browser-toolbar,
+[data-theme="null"] .chat-header,
+[data-theme="null"] .chat-input-area,
+[data-theme="null"] .standalone-chat-input-area {
+  background: rgba(35, 37, 48, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Null: 네비게이션 active */
+[data-theme="null"] .nav-btn.active {
+  background: rgba(139, 159, 186, 0.3);
+  box-shadow: 0 4px 18px rgba(139, 159, 186, 0.15);
+}
+
+/* Null: 검색 버튼 */
+[data-theme="null"] .search-btn,
+[data-theme="null"] .standalone-chat-send-btn {
+  background: linear-gradient(135deg, rgba(100,120,150,0.85), rgba(130,150,180,0.85));
+}
+
+/* Null: 필터, 칩 버튼 */
+[data-theme="null"] .filter-btn,
+[data-theme="null"] .instruction-chip,
+[data-theme="null"] .chat-suggest-btn,
+[data-theme="null"] .standalone-suggest-btn {
+  background: rgba(28, 30, 40, 0.6);
+  border-color: rgba(100, 110, 130, 0.25);
+}
+
+/* Null: 히어로 타이틀 */
+[data-theme="null"] .hero-title {
+  background: linear-gradient(135deg, #b0c0d4, #8a9ab0, #a0b0c4);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Null: AI 요약 */
+[data-theme="null"] .ai-summary {
+  background: linear-gradient(135deg, rgba(100,120,150,0.12), rgba(130,150,180,0.12));
+  border-color: rgba(100,120,150,0.3);
+}
+
+/* Null: 스크롤바 */
+[data-theme="null"] ::-webkit-scrollbar-thumb {
+  background: rgba(100, 110, 130, 0.4);
+}
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+#sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.sidebar-nav {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.sidebar-footer {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.search-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.search-history-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.clear-history-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.clear-history-btn:hover {
+  background: var(--bg-tertiary);
+  color: #ef4444;
+}
+
+.history-list {
+  list-style: none;
+}
+
+.history-list li {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  gap: 4px;
+}
+
+.history-list li:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.history-text {
+  flex: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.history-list li:hover .history-delete-btn {
+  opacity: 1;
+}
+.history-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Main Content */
+#main-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-content {
+  display: none;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Search Hero */
+.search-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 40px 40px;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+.search-box-wrapper {
+  width: 100%;
+  max-width: 680px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 6px 6px 18px;
+  transition: all 0.3s;
+  gap: 8px;
+}
+
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: inherit;
+  padding: 12px 8px;
+}
+
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-btn {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== AI 지시 입력 ===== */
+.ai-instruction-area {
+  width: 100%;
+  max-width: 680px;
+  margin-top: 10px;
+}
+
+.instruction-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.instruction-toggle:hover {
+  color: var(--accent);
+}
+.instruction-toggle.open {
+  color: var(--accent);
+}
+
+.instruction-chevron {
+  transition: transform 0.25s ease;
+}
+.instruction-toggle.open .instruction-chevron {
+  transform: rotate(180deg);
+}
+
+.instruction-panel {
+  margin-top: 8px;
+  animation: fadeIn 0.25s ease;
+}
+.instruction-panel.hidden { display: none !important; }
+
+.instruction-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.instruction-chip {
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.instruction-chip:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+.instruction-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.ai-instruction-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+.ai-instruction-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.ai-instruction-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Loading */
+.loading-area {
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.loading-area.hidden { display: none; }
+
+.loading-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.step.active {
+  color: var(--text-primary);
+}
+
+.step.done {
+  color: var(--success);
+}
+
+.step-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.step-pending {
+  width: 10px;
+  height: 10px;
+  background: var(--border);
+  border-radius: 50%;
+}
+
+.step-check {
+  color: var(--success);
+  font-size: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 분할 뷰 컨테이너 ===== */
+.split-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.split-container.hidden { display: none !important; }
+
+.results-panel {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+  transition: flex 0.3s ease;
+}
+
+.split-container.split-active .results-panel {
+  flex: 0 0 42%;
+  max-width: 42%;
+}
+
+.split-container.split-active .browser-panel {
+  flex: 1;
+  border-left: 2px solid var(--border);
+}
+
+/* Results */
+.results-area {
+  padding: 0 24px 40px;
+  width: 100%;
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.result-query {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ===== 출처 유형 필터 ===== */
+.source-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+.filter-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.filter-dot.official { background: #60a5fa; }
+.filter-dot.news { background: #a78bfa; }
+.filter-dot.academic { background: #34d399; }
+.filter-dot.blog { background: #fb923c; }
+.filter-dot.community { background: #fbbf24; }
+
+/* 출처 뱃지 */
+.source-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.source-badge.official { background: rgba(96,165,250,0.2); color: #60a5fa; }
+.source-badge.news     { background: rgba(167,139,250,0.2); color: #a78bfa; }
+.source-badge.academic { background: rgba(52,211,153,0.2);  color: #34d399; }
+.source-badge.blog     { background: rgba(251,146,60,0.2);  color: #fb923c; }
+.source-badge.community{ background: rgba(251,191,36,0.2);  color: #fbbf24; }
+.source-badge.other    { background: rgba(107,107,128,0.2); color: var(--text-muted); }
+
+.result-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.result-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bookmark-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bookmark-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bookmark-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.1); }
+
+/* ===== 낮은 신뢰도 팝업 배너 ===== */
+.low-quality-banner {
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,146,60,0.12));
+  border: 1px solid rgba(251,191,36,0.35);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  animation: bannerSlideDown 0.4s ease;
+}
+.low-quality-banner.hidden { display: none !important; }
+
+@keyframes bannerSlideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.low-quality-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.low-quality-banner-icon {
+  color: #fbbf24;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.low-quality-banner-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.low-quality-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.low-quality-chat-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.low-quality-dismiss {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.low-quality-dismiss:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-secondary);
+}
+
+/* AI Summary */
+.ai-summary {
+  background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(167, 139, 250, 0.1));
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  animation: fadeIn 0.4s ease;
+}
+
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.ai-summary-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+/* Result Cards */
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  transition: all 0.2s;
+  animation: fadeIn 0.4s ease;
+  animation-fill-mode: both;
+  cursor: pointer;
+}
+
+.result-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.result-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.result-url {
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.score-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 12px;
+  min-width: 70px;
+}
+
+.score-badge.high {
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.score-badge.mid {
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.score-badge.low {
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.score-number {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-badge.high .score-number { color: var(--score-high); }
+.score-badge.mid .score-number { color: var(--score-mid); }
+.score-badge.low .score-number { color: var(--score-low); }
+
+.score-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+.result-snippet {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.result-reason {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.result-reason-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Error */
+.error-area {
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.error-area.hidden { display: none; }
+
+.error-card {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 16px;
+  padding: 24px 32px;
+  max-width: 600px;
+  width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+
+.error-card h3 {
+  color: var(--error);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.error-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Settings */
+.settings-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
+  width: 100%;
+}
+
+.settings-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: var(--text-primary);
+}
+
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.settings-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.settings-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.settings-input {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.settings-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.settings-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.settings-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.settings-link {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.settings-link:hover {
+  text-decoration: underline;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.radio-label:hover {
+  background: var(--bg-tertiary);
+}
+
+.radio-label input[type="radio"] {
+  display: none;
+}
+
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom {
+  border-color: var(--accent);
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.api-key-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.api-key-wrapper .settings-input {
+  flex: 1;
+}
+
+.icon-btn {
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.save-btn {
+  padding: 12px 32px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.save-status {
+  font-size: 13px;
+  color: var(--success);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.save-status.visible {
+  opacity: 1;
+}
+
+/* ===== 테마 선택 프리뷰 ===== */
+.theme-options {
+  display: flex;
+  gap: 14px;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+.theme-option:hover { color: var(--text-primary); }
+.theme-option input[type="radio"] { display: none; }
+
+.theme-preview {
+  width: 90px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+
+.theme-option input[type="radio"]:checked ~ .theme-preview {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.theme-option input[type="radio"]:checked ~ span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.dark-preview  { background: #0f0f1a; }
+.light-preview { background: #f5f5fa; }
+.null-preview  {
+  background: linear-gradient(180deg, #3d3f4e 0%, #535663 50%, #6b6e7a 100%);
+  position: relative;
+  overflow: hidden;
+}
+.null-preview-mountains {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 30'%3E%3Cpath d='M0 30 L0 18 Q15 8 30 15 Q45 5 60 12 Q75 3 90 10 L90 30Z' fill='%23282a36' opacity='0.9'/%3E%3Cpath d='M0 30 L0 22 Q20 14 40 20 Q60 12 80 18 L90 16 L90 30Z' fill='%23323444' opacity='0.7'/%3E%3C/svg%3E") no-repeat bottom / cover;
+}
+.null-preview .theme-preview-bar  { background: rgba(139,127,245,0.7); position: relative; z-index: 1; }
+.null-preview .theme-preview-line { background: rgba(120,118,140,0.4); position: relative; z-index: 1; }
+.system-preview { background: transparent; padding: 0; }
+
+.theme-preview-bar {
+  height: 6px;
+  border-radius: 3px;
+  width: 60%;
+}
+.dark-preview .theme-preview-bar  { background: #6c63ff; }
+.light-preview .theme-preview-bar { background: #6c63ff; }
+
+.theme-preview-line {
+  height: 4px;
+  border-radius: 2px;
+  width: 100%;
+}
+.theme-preview-line.short { width: 65%; }
+.dark-preview .theme-preview-line  { background: #2a2a45; }
+.light-preview .theme-preview-line { background: #d8d8e8; }
+
+.theme-preview-split {
+  display: flex;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.theme-preview-half {
+  flex: 1;
+}
+.dark-half  { background: #0f0f1a; }
+.light-half { background: #f5f5fa; }
+
+/* ===== 레인지 슬라이더 ===== */
+.settings-range {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+.settings-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 0 6px var(--accent-glow);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.settings-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ===== 텍스트영역 ===== */
+.settings-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+/* ===== 체크박스 라벨 ===== */
+.settings-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.settings-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ===== 숨겨진 결과 카드 (임계값) ===== */
+.result-card.below-threshold {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+  transform: scale(0.98);
+  pointer-events: auto;
+}
+.result-card.below-threshold:hover {
+  opacity: 0.7;
+  filter: none;
+  transform: translateY(-2px);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 내장 브라우저 패널 (분할 뷰) ===== */
+.browser-panel {
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  animation: browserSlideIn 0.25s ease;
+  min-width: 0;
+}
+
+.browser-panel.hidden {
+  display: none !important;
+}
+
+@keyframes browserSlideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.browser-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.browser-nav-btns {
+  display: flex;
+  gap: 2px;
+}
+
+.browser-nav-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.browser-nav-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.browser-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.browser-url-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 14px;
+  min-width: 0;
+}
+
+.browser-url-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.browser-url-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: all;
+}
+
+.browser-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.browser-close-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.browser-close-btn:hover {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--error);
+}
+
+.browser-loading-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #a78bfa, var(--accent));
+  background-size: 200% 100%;
+  animation: loadingBar 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.browser-loading-bar.hidden {
+  display: none !important;
+}
+
+@keyframes loadingBar {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.browser-webview {
+  flex: 1;
+  border: none;
+  background: white;
+}
+
+/* ===== AI 채팅 패널 ===== */
+.chat-panel {
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  animation: browserSlideIn 0.25s ease;
+}
+.chat-panel.hidden { display: none !important; }
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chat-toggle-btn {
+  margin-left: auto;
+  background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(167,139,250,0.2)) !important;
+  border-color: rgba(108,99,255,0.4) !important;
+  color: var(--accent) !important;
+}
+.chat-toggle-btn:hover {
+  background: linear-gradient(135deg, rgba(108,99,255,0.3), rgba(167,139,250,0.3)) !important;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 16px;
+  gap: 12px;
+  flex: 1;
+}
+.chat-welcome-icon { font-size: 36px; }
+.chat-welcome p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.chat-suggest-btn {
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+.chat-suggest-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.chat-msg {
+  display: flex;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.chat-msg.user {
+  justify-content: flex-end;
+}
+
+.chat-msg.user .chat-msg-content {
+  background: var(--accent);
+  color: white;
+  border-radius: 14px 14px 4px 14px;
+  padding: 10px 14px;
+  max-width: 85%;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.chat-msg.ai .chat-msg-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px 14px 14px 4px;
+  padding: 12px 14px;
+  max-width: 90%;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.chat-msg-avatar {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.chat-msg.error .chat-msg-content {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--error);
+  font-size: 12px;
+}
+
+.chat-typing {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+.chat-typing span {
+  width: 6px; height: 6px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: chatBounce 1.2s ease-in-out infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes chatBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-input::placeholder { color: var(--text-muted); }
+
+.chat-send-btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.chat-send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.chat-error { font-size: 12px; }
+
+/* split-active에서 chat-panel도 표시 */
+.split-container.split-active .chat-panel:not(.hidden) {
+  flex: 1;
+  border-left: 2px solid var(--border);
+}
+
+/* ===== 북마크 탭 ===== */
+.bookmarks-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 40px 40px;
+  width: 100%;
+}
+
+.bookmarks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bookmarks-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.collection-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.collection-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.btn-danger:hover {
+  border-color: var(--error) !important;
+  color: var(--error) !important;
+}
+
+.bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookmark-card {
+  cursor: pointer;
+}
+
+.bm-collection-select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.bm-remove-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bm-remove-btn:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(248,113,113,0.1);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-state p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.empty-state span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== 독립 AI 채팅 탭 ===== */
+.standalone-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.standalone-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.standalone-chat-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 20px 40px;
+  gap: 8px;
+  flex: 1;
+}
+
+.standalone-chat-welcome-icon {
+  font-size: 52px;
+  margin-bottom: 8px;
+}
+
+.standalone-chat-title {
+  font-size: 30px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+.standalone-chat-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.standalone-chat-suggestions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.standalone-suggest-btn {
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  line-height: 1.5;
+}
+.standalone-suggest-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* 독립 채팅 메시지 */
+.standalone-msg {
+  display: flex;
+  gap: 10px;
+  animation: fadeIn 0.3s ease;
+  max-width: 100%;
+}
+
+.standalone-msg.user {
+  justify-content: flex-end;
+}
+
+.standalone-msg.user .standalone-msg-content {
+  background: var(--accent);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 18px;
+  max-width: 75%;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ===== 채팅 이미지 첨부 ===== */
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chat-clear-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.chat-clear-btn:hover {
+  background: var(--bg-secondary);
+  color: #ef4444;
+}
+.chat-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.chat-image-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.chat-image-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chat-image-preview {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.chat-img-thumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  position: relative;
+}
+.chat-img-thumb img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.chat-img-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-img-remove {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+.chat-img-remove:hover {
+  background: #ef4444;
+}
+.chat-msg-image {
+  margin-bottom: 6px;
+}
+.chat-msg-image img {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ===== 결과 카드 - 웹 자료 영역 ===== */
+.result-content-area {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.result-content-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.result-content-status {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+.result-content-body {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.84rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.content-meta {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.content-description {
+  font-style: italic;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+}
+.content-paragraph {
+  margin-bottom: 8px;
+}
+.content-paragraph:last-child {
+  margin-bottom: 0;
+}
+.content-empty {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+.content-more-btn {
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.content-more-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+.content-failed .result-content-body {
+  opacity: 0.6;
+}
+.content-loading {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  padding: 12px;
+}
+.content-loading span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: content-loading-pulse 1.2s infinite;
+}
+.content-loading span:nth-child(2) { animation-delay: 0.2s; }
+.content-loading span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes content-loading-pulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Null 테마용 */
+[data-theme="null"] .result-content-body {
+  background: rgba(255,255,255,0.06);
+}
+
+/* ===== 검색 필터 ===== */
+.search-filters {
+  margin-top: 6px;
+}
+.filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.filter-group {
+  flex: 1;
+  min-width: 120px;
+}
+.filter-group .input-label {
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+  display: block;
+  color: var(--text-secondary);
+}
+.filter-select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus {
+  border-color: var(--accent);
+}
+
+/* ===== 통계 대시보드 ===== */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.chart-area {
+  padding: 8px 0;
+}
+
+/* 바 차트 */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bar-label {
+  min-width: 70px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+.bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+  min-width: 2px;
+}
+.bar-value {
+  min-width: 36px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 키워드 태그 */
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+.keyword-tag .tag-count {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+/* 추이 차트 */
+.trend-chart-canvas {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: 8px;
+}
+.trend-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.trend-bar {
+  width: 100%;
+  max-width: 40px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease;
+}
+.trend-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+  text-align: center;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .stats-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Null 테마 통계 카드 */
+[data-theme="null"] .stat-card {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+}
+[data-theme="null"] .bar-track {
+  background: rgba(255,255,255,0.06);
+}
+[data-theme="null"] .keyword-tag {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+}
+/* Light 테마 통계 */
+[data-theme="light"] .stat-card {
+  background: #fff;
+  border-color: #e2e8f0;
+}
+[data-theme="light"] .bar-track {
+  background: #f0f4f8;
+}
+
+.standalone-msg.ai {
+  align-items: flex-start;
+}
+
+.standalone-msg.ai .standalone-msg-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  padding: 14px 18px;
+  max-width: 85%;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.standalone-msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(167,139,250,0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.standalone-msg.error .standalone-msg-content {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+/* 독립 채팅 타이핑 인디케이터 */
+.standalone-msg.ai.loading .standalone-msg-content {
+  padding: 14px 20px;
+}
+
+/* 독립 채팅 입력 영역 */
+.standalone-chat-input-area {
+  padding: 16px 32px 20px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.standalone-chat-input-box {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 4px 4px 4px 18px;
+  transition: all 0.3s;
+  gap: 8px;
+}
+
+.standalone-chat-input-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.standalone-chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  padding: 12px 8px;
+}
+.standalone-chat-input::placeholder { color: var(--text-muted); }
+
+.standalone-chat-send-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.standalone-chat-send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--accent-glow); }
+.standalone-chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.standalone-chat-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+.standalone-chat-clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.standalone-chat-clear-btn:hover {
+  border-color: var(--border);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+.standalone-chat-model-info {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===== 오프라인 데모용 추가 스타일 ===== */
+.browser-webview {
+  overflow-y: auto;
+  background: var(--bg-secondary);
+}
+.doc-view {
+  padding: 28px 30px 60px;
+  max-width: 720px;
+  margin: 0 auto;
+  color: var(--text-primary);
+  line-height: 1.75;
+}
+.doc-view h1 {
+  font-size: 1.3rem;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+.doc-view .doc-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-view p {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+.doc-view .doc-note {
+  margin-top: 26px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <!-- 사이드바 -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">
+          <span class="logo-icon"></span>
+          <span>SearchCheck</span>
+        </h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span>검색</span>
+        </button>
+        <button class="nav-btn" data-tab="chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>채팅</span>
+        </button>
+        <button class="nav-btn" data-tab="bookmarks">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>북마크</span>
+        </button>
+        <button class="nav-btn" data-tab="stats">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+          <span>통계</span>
+        </button>
+        <button class="nav-btn" data-tab="settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2m-9-11h2m18 0h2m-3.64-6.36l-1.42 1.42M6.06 17.94l-1.42 1.42m0-13.86l1.42 1.42m11.88 11.88l1.42 1.42"/>
+          </svg>
+          <span>설정</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="search-history-header">
+          <span class="search-history-title">최근 검색</span>
+          <button id="clear-history-btn" class="clear-history-btn hidden" title="전체 삭제">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+      </div>
+    </aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main id="main-content">
+      <!-- AI 검색 탭 -->
+      <section id="tab-search" class="tab-content active">
+        <div class="search-hero" id="search-hero">
+          <h2 class="hero-title">서치체크</h2>
+          <p class="hero-subtitle">검색 결과를 AI가 분석하여 신뢰도순으로 정렬합니다</p>
+          <div class="search-box-wrapper">
+            <div class="search-box">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input type="text" id="search-input" placeholder="검색어를 입력하세요..." autocomplete="off">
+              <button id="search-btn" class="search-btn">검색</button>
+            </div>
+            <!-- AI 지시 입력 -->
+            <div class="ai-instruction-area">
+              <button id="instruction-toggle" class="instruction-toggle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                AI에게 지시하기
+                <svg class="instruction-chevron" id="instruction-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+              <div id="instruction-panel" class="instruction-panel hidden">
+                <div class="instruction-chips" id="instruction-chips">
+                  <button class="instruction-chip" data-instruction="커뮤니티/포럼 위주로 평가해줘">커뮤니티 위주</button>
+                  <button class="instruction-chip" data-instruction="뉴스/언론 기사를 높게 평가해줘">뉴스 기반</button>
+                  <button class="instruction-chip" data-instruction="학술 자료와 공식 출처를 높게 평가해줘">학술/공식 우선</button>
+                  <button class="instruction-chip" data-instruction="블로그나 개인 경험담 위주로 평가해줘">블로그/경험담</button>
+                  <button class="instruction-chip" data-instruction="최신 정보를 우선시해줘">최신 정보 우선</button>
+                  <button class="instruction-chip" data-instruction="초보자도 이해하기 쉬운 결과를 높게 평가해줘">쉬운 설명 우선</button>
+                </div>
+                <input type="text" id="ai-instruction" class="ai-instruction-input" placeholder="예: 커뮤니티 위주로 검색해, 뉴스를 기반으로 해..." autocomplete="off">
+              </div>
+            </div>
+            <!-- 검색 필터 -->
+            <div class="search-filters">
+              <button id="filter-toggle" class="instruction-toggle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+                검색 필터
+                <svg class="instruction-chevron" id="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+              <div id="filter-panel" class="instruction-panel hidden">
+                <div class="filter-row">
+                  <div class="filter-group">
+                    <label class="input-label">기간</label>
+                    <select id="filter-time" class="filter-select">
+                      <option value="">전체</option>
+                      <option value="d">최근 24시간</option>
+                      <option value="w">최근 1주일</option>
+                      <option value="m">최근 1개월</option>
+                      <option value="y">최근 1년</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label class="input-label">지역</label>
+                    <select id="filter-region" class="filter-select">
+                      <option value="wt-wt">전체</option>
+                      <option value="kr-kr">한국</option>
+                      <option value="us-en">미국</option>
+                      <option value="jp-jp">일본</option>
+                      <option value="gb-en">영국</option>
+                      <option value="de-de">독일</option>
+                      <option value="fr-fr">프랑스</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label class="input-label">세이프서치</label>
+                    <select id="filter-safe" class="filter-select">
+                      <option value="moderate">보통</option>
+                      <option value="strict">엄격</option>
+                      <option value="off">끄기</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 로딩 상태 -->
+        <div id="loading-area" class="loading-area hidden">
+          <div class="loading-card">
+            <div class="loading-steps">
+              <div class="step" id="step-google">
+                <div class="step-icon"><div class="spinner"></div></div>
+                <span>웹에서 검색 중...</span>
+              </div>
+              <div class="step" id="step-ai">
+                <div class="step-icon"><div class="step-pending"></div></div>
+                <span>AI가 사실성을 평가하는 중...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 분할 뷰 컨테이너 -->
+        <div id="split-container" class="split-container hidden">
+          <!-- 왼쪽: 검색 결과 -->
+          <div id="results-panel" class="results-panel">
+            <div id="results-area" class="results-area">
+              <div class="results-header">
+                <button id="new-search-btn" class="toolbar-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5m7-7-7 7 7 7"/>
+                  </svg>
+                  새 검색
+                </button>
+                <span id="result-query" class="result-query"></span>
+                <button id="open-chat-btn" class="toolbar-btn chat-toggle-btn" title="AI에게 질문">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  AI 채팅
+                </button>
+              </div>
+
+              <!-- 출처 유형 필터 -->
+              <div id="source-filters" class="source-filters">
+                <button class="filter-btn active" data-filter="all">전체</button>
+                <button class="filter-btn" data-filter="official">
+                  <span class="filter-dot official"></span>공식
+                </button>
+                <button class="filter-btn" data-filter="news">
+                  <span class="filter-dot news"></span>뉴스
+                </button>
+                <button class="filter-btn" data-filter="academic">
+                  <span class="filter-dot academic"></span>학술
+                </button>
+                <button class="filter-btn" data-filter="blog">
+                  <span class="filter-dot blog"></span>블로그
+                </button>
+                <button class="filter-btn" data-filter="community">
+                  <span class="filter-dot community"></span>커뮤니티
+                </button>
+              </div>
+
+              <!-- 낮은 신뢰도 팝업 배너 -->
+              <div id="low-quality-banner" class="low-quality-banner hidden">
+                <div class="low-quality-banner-content">
+                  <div class="low-quality-banner-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+                    </svg>
+                  </div>
+                  <span class="low-quality-banner-text">원하는 정보를 찾지 못했나요? 직접 대화하며 찾기</span>
+                  <button id="low-quality-chat-btn" class="low-quality-chat-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    AI 채팅으로 이동
+                  </button>
+                  <button id="low-quality-dismiss" class="low-quality-dismiss" title="닫기">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div id="ai-summary" class="ai-summary"></div>
+              <div id="results-list" class="results-list"></div>
+            </div>
+          </div>
+
+          <!-- 오른쪽: 내장 브라우저 -->
+          <div id="browser-panel" class="browser-panel hidden">
+            <div class="browser-toolbar">
+              <div class="browser-nav-btns">
+                <button id="browser-back" class="browser-nav-btn" title="뒤로">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+                </button>
+                <button id="browser-forward" class="browser-nav-btn" title="앞으로">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                </button>
+                <button id="browser-reload" class="browser-nav-btn" title="새로고침">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                </button>
+              </div>
+              <div class="browser-url-bar">
+                <svg class="browser-url-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+                <span id="browser-url" class="browser-url-text"></span>
+              </div>
+              <div class="browser-actions">
+                <button id="browser-external" class="browser-nav-btn" title="외부 브라우저에서 열기">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </button>
+                <button id="browser-close" class="browser-close-btn" title="닫기">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="browser-loading-bar hidden" id="browser-loading-bar"></div>
+            <div id="browser-webview" class="browser-webview"></div>
+          </div>
+
+          <!-- 오른쪽: AI 채팅 패널 -->
+          <div id="chat-panel" class="chat-panel hidden">
+            <div class="chat-header">
+              <div class="chat-header-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>AI 채팅</span>
+              </div>
+              <div class="chat-header-actions">
+                <button id="chat-clear" class="chat-clear-btn" title="대화 초기화">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+                <button id="chat-close" class="browser-close-btn" title="닫기">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+              <div class="chat-welcome">
+                <div class="chat-welcome-icon">&#x1F50D;</div>
+                <p>검색 결과에 대해 궁금한 점을 물어보세요!</p>
+                <div class="chat-suggestions" id="chat-suggestions">
+                  <button class="chat-suggest-btn">이 결과들의 핵심 차이점은?</button>
+                  <button class="chat-suggest-btn">가장 신뢰할 수 있는 정보는?</button>
+                  <button class="chat-suggest-btn">이 주제에 대해 더 자세히 설명해줘</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <div id="chat-image-preview" class="chat-image-preview hidden"></div>
+              <div class="chat-input-row">
+                <button id="chat-image-btn" class="chat-image-btn" title="이미지 첨부">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </button>
+                <input type="file" id="chat-image-input" accept="image/*" style="display:none;">
+                <input type="text" id="chat-input" class="chat-input" placeholder="AI에게 질문하세요..." autocomplete="off">
+                <button id="chat-send" class="chat-send-btn" title="전송">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 에러 -->
+        <div id="error-area" class="error-area hidden"></div>
+      </section>
+
+      <!-- AI 채팅 탭 -->
+      <section id="tab-chat" class="tab-content">
+        <div class="standalone-chat">
+          <div id="standalone-chat-messages" class="standalone-chat-messages">
+            <div class="standalone-chat-welcome">
+              <div class="standalone-chat-welcome-icon">&#x1F50D;</div>
+              <h2 class="standalone-chat-title">AI 어시스턴트</h2>
+              <p class="standalone-chat-desc">무엇이든 물어보세요! 궁금한 것을 AI가 답변해드립니다.</p>
+              <div class="standalone-chat-suggestions">
+                <button class="standalone-suggest-btn" data-q="오늘의 주요 뉴스를 알려줘">오늘의 주요 뉴스를 알려줘</button>
+                <button class="standalone-suggest-btn" data-q="프로그래밍에 대해 질문하고 싶어">프로그래밍에 대해 질문하고 싶어</button>
+                <button class="standalone-suggest-btn" data-q="글쓰기를 도와줘">글쓰기를 도와줘</button>
+                <button class="standalone-suggest-btn" data-q="복잡한 개념을 쉽게 설명해줘">복잡한 개념을 쉽게 설명해줘</button>
+              </div>
+            </div>
+          </div>
+          <div class="standalone-chat-input-area">
+            <div id="standalone-chat-image-preview" class="chat-image-preview hidden"></div>
+            <div class="standalone-chat-input-box">
+              <button id="standalone-chat-image-btn" class="chat-image-btn" title="이미지 첨부">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </button>
+              <input type="file" id="standalone-chat-image-input" accept="image/*" style="display:none;">
+              <input type="text" id="standalone-chat-input" class="standalone-chat-input" placeholder="AI에게 메시지를 입력하세요..." autocomplete="off">
+              <button id="standalone-chat-send" class="standalone-chat-send-btn" title="전송">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+            <div class="standalone-chat-footer">
+              <button id="standalone-chat-clear" class="standalone-chat-clear-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                대화 초기화
+              </button>
+              <span class="standalone-chat-model-info" id="standalone-model-info"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 북마크 탭 -->
+      <section id="tab-bookmarks" class="tab-content">
+        <div class="bookmarks-container">
+          <div class="bookmarks-header">
+            <h2 class="bookmarks-title">북마크</h2>
+            <div class="collection-controls">
+              <select id="collection-select" class="collection-select">
+                <option value="__all__">전체 북마크</option>
+                <option value="기본">기본</option>
+              </select>
+              <button id="add-collection-btn" class="toolbar-btn" title="새 컬렉션">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                추가
+              </button>
+              <button id="del-collection-btn" class="toolbar-btn btn-danger" title="컬렉션 삭제">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="bookmarks-list" class="bookmarks-list">
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              <p>저장된 북마크가 없습니다</p>
+              <span>검색 결과에서 북마크 아이콘을 눌러 저장하세요</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 설정 탭 -->
+      <section id="tab-settings" class="tab-content">
+        <div class="settings-container">
+          <h2 class="settings-title">설정</h2>
+
+          <div class="settings-card">
+            <h3>Hugging Face</h3>
+            <p class="settings-desc">AI 사실성 평가에 사용됩니다. huggingface.co에서 무료 토큰을 발급받으세요.</p>
+            <div class="setting-group">
+              <label class="input-label" for="ai-api-key">Hugging Face API Token</label>
+              <div class="api-key-wrapper">
+                <input type="password" id="ai-api-key" placeholder="hf_xxxxxxxxxxxx" class="settings-input">
+                <button id="toggle-key" class="icon-btn" title="보기/숨기기">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="setting-group">
+              <label class="input-label" for="hf-model">AI 모델</label>
+              <select id="hf-model" class="settings-input settings-select">
+                <optgroup label="텍스트 전용">
+                  <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B (추천)</option>
+                  <option value="Qwen/Qwen3-235B-A22B">Qwen 3 235B (최신, 강력)</option>
+                  <option value="meta-llama/Llama-3.3-70B-Instruct">Llama 3.3 70B</option>
+                  <option value="deepseek-ai/DeepSeek-V3.2">DeepSeek V3.2</option>
+                  <option value="deepseek-ai/DeepSeek-R1-0528">DeepSeek R1</option>
+                  <option value="Qwen/Qwen3-32B">Qwen 3 32B (빠름)</option>
+                </optgroup>
+                <optgroup label="이미지 인식 (Vision)">
+                  <option value="Qwen/Qwen2-VL-72B-Instruct">Qwen2-VL 72B (이미지)</option>
+                  <option value="Qwen/Qwen2.5-VL-72B-Instruct">Qwen2.5-VL 72B (이미지)</option>
+                  <option value="meta-llama/Llama-3.2-11B-Vision-Instruct">Llama 3.2 Vision 11B</option>
+                  <option value="meta-llama/Llama-3.2-90B-Vision-Instruct">Llama 3.2 Vision 90B</option>
+                </optgroup>
+                <option value="custom">직접 입력...</option>
+              </select>
+            </div>
+            <div class="setting-group hidden" id="custom-model-group">
+              <label class="input-label" for="hf-custom-model">모델 ID</label>
+              <input type="text" id="hf-custom-model" placeholder="예: organization/model-name" class="settings-input">
+            </div>
+            <a class="settings-link" href="#" id="hf-help-link">Hugging Face 토큰 발급 방법 &rarr;</a>
+          </div>
+
+          <!-- 테마 설정 -->
+          <div class="settings-card">
+            <h3>테마</h3>
+            <p class="settings-desc">앱의 외관 테마를 변경합니다.</p>
+            <div class="setting-group">
+              <div class="theme-options">
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="dark" checked>
+                  <div class="theme-preview dark-preview">
+                    <div class="theme-preview-bar"></div>
+                    <div class="theme-preview-line"></div>
+                    <div class="theme-preview-line short"></div>
+                  </div>
+                  <span>다크</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="light">
+                  <div class="theme-preview light-preview">
+                    <div class="theme-preview-bar"></div>
+                    <div class="theme-preview-line"></div>
+                    <div class="theme-preview-line short"></div>
+                  </div>
+                  <span>라이트</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="null">
+                  <div class="theme-preview null-preview">
+                    <div class="null-preview-mountains"></div>
+                    <div class="theme-preview-bar"></div>
+                    <div class="theme-preview-line"></div>
+                  </div>
+                  <span>Null</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="system">
+                  <div class="theme-preview system-preview">
+                    <div class="theme-preview-split">
+                      <div class="theme-preview-half dark-half"></div>
+                      <div class="theme-preview-half light-half"></div>
+                    </div>
+                  </div>
+                  <span>시스템</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 검색 설정 -->
+          <div class="settings-card">
+            <h3>검색</h3>
+            <p class="settings-desc">검색 결과 표시 방식을 설정합니다.</p>
+            <div class="setting-group">
+              <label class="input-label" for="result-count">검색 결과 개수</label>
+              <select id="result-count" class="settings-input settings-select">
+                <option value="5">5개</option>
+                <option value="10" selected>10개 (기본)</option>
+                <option value="15">15개</option>
+                <option value="20">20개</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label class="input-label" for="sort-mode">결과 정렬</label>
+              <select id="sort-mode" class="settings-input settings-select">
+                <option value="score-desc" selected>신뢰도 높은순</option>
+                <option value="score-asc">신뢰도 낮은순</option>
+                <option value="original">검색엔진 기본순</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label class="input-label">신뢰도 임계값: <strong id="threshold-value">0</strong>점 미만 숨김</label>
+              <input type="range" id="score-threshold" class="settings-range" min="0" max="80" step="5" value="0">
+              <div class="range-labels">
+                <span>끄기(0)</span>
+                <span>80</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 불신 사이트 -->
+          <div class="settings-card">
+            <h3>불신 사이트 관리</h3>
+            <p class="settings-desc">등록한 도메인의 검색 결과는 신뢰도 점수가 자동으로 감점됩니다. (한 줄에 하나씩 입력)</p>
+            <div class="setting-group">
+              <label class="input-label" for="distrust-penalty">감점 수준</label>
+              <select id="distrust-penalty" class="settings-input settings-select">
+                <option value="15">약하게 (-15점)</option>
+                <option value="30" selected>보통 (-30점)</option>
+                <option value="50">강하게 (-50점)</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label class="input-label" for="distrust-sites">불신 사이트 목록</label>
+              <textarea id="distrust-sites" class="settings-input settings-textarea" rows="4" placeholder="예:&#10;example.com&#10;spam-blog.net"></textarea>
+            </div>
+          </div>
+
+          <!-- 백그라운드 & 자동 검색 -->
+          <div class="settings-card">
+            <h3>백그라운드 동작</h3>
+            <p class="settings-desc">앱을 닫아도 시스템 트레이에서 백그라운드로 실행됩니다.</p>
+
+            <div class="setting-group">
+              <label class="settings-label">
+                <input type="checkbox" id="start-hidden"> 시작 시 숨김 모드 (창 없이 트레이에서 시작)
+              </label>
+            </div>
+
+            <div class="setting-group" style="margin-top:12px;">
+              <label class="settings-label">
+                <input type="checkbox" id="auto-search-enabled"> 자동 검색 활성화
+              </label>
+            </div>
+
+            <div id="auto-search-options" class="hidden" style="margin-top:8px;">
+              <div class="setting-group">
+                <label class="input-label" for="auto-search-interval">검색 주기</label>
+                <select id="auto-search-interval" class="settings-input settings-select">
+                  <option value="10">10분</option>
+                  <option value="30" selected>30분</option>
+                  <option value="60">1시간</option>
+                  <option value="180">3시간</option>
+                  <option value="360">6시간</option>
+                  <option value="720">12시간</option>
+                </select>
+              </div>
+              <div class="setting-group">
+                <label class="input-label" for="auto-search-keywords">자동 검색 키워드 (한 줄에 하나씩)</label>
+                <textarea id="auto-search-keywords" class="settings-input settings-textarea" rows="4" placeholder="예:&#10;AI 뉴스&#10;프로그래밍 트렌드&#10;보안 취약점"></textarea>
+              </div>
+              <div class="setting-group" style="margin-top:8px;">
+                <button id="auto-search-run-now" class="save-btn" style="background:var(--accent);width:auto;padding:6px 16px;font-size:0.85rem;">지금 실행</button>
+                <span id="auto-search-status" class="save-status"></span>
+              </div>
+
+              <!-- 자동 검색 결과 미리보기 -->
+              <div id="auto-search-results-area" class="hidden" style="margin-top:12px;">
+                <label class="input-label">최근 자동 검색 결과</label>
+                <div id="auto-search-results-list" style="max-height:200px;overflow-y:auto;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button id="save-settings-btn" class="save-btn">설정 저장</button>
+            <span id="save-status" class="save-status"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 통계 대시보드 탭 -->
+      <section id="tab-stats" class="tab-content">
+        <div class="settings-scroll">
+          <h2 class="settings-title">통계 대시보드</h2>
+
+          <!-- 요약 카드 -->
+          <div class="stats-summary">
+            <div class="stat-card">
+              <div class="stat-number" id="stat-total-searches">0</div>
+              <div class="stat-label">총 검색 횟수</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-avg-score">-</div>
+              <div class="stat-label">평균 신뢰도</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-total-results">0</div>
+              <div class="stat-label">분석된 결과</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-bookmarks">0</div>
+              <div class="stat-label">북마크</div>
+            </div>
+          </div>
+
+          <!-- 출처 유형 분포 -->
+          <div class="settings-card">
+            <h3>출처 유형 분포</h3>
+            <div id="source-chart" class="chart-area"></div>
+          </div>
+
+          <!-- 신뢰도 분포 -->
+          <div class="settings-card">
+            <h3>신뢰도 분포</h3>
+            <div id="score-chart" class="chart-area"></div>
+          </div>
+
+          <!-- 최근 검색 키워드 빈도 -->
+          <div class="settings-card">
+            <h3>자주 검색한 키워드</h3>
+            <div id="keyword-chart" class="chart-area"></div>
+          </div>
+
+          <!-- 신뢰도 추이 -->
+          <div class="settings-card">
+            <h3>최근 검색 신뢰도 추이</h3>
+            <div id="trend-chart" class="chart-area"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+/* ===========================================================
+   SearchCheck — 데모(오프라인) 렌더러
+   무엇을 검색하든 항상 이순신 장군에 대한 결과를 보여줍니다.
+   =========================================================== */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const escapeHtml = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  const SOURCE_LABELS = {
+    official: '공식', news: '뉴스', blog: '블로그',
+    academic: '학술', community: '커뮤니티', other: '기타'
+  };
+
+  /* ───────── 데이터: 항상 이순신 ───────── */
+
+  const SUMMARY =
+    '이순신(李舜臣, 1545~1598)은 조선 중기의 무신으로, 임진왜란에서 조선 수군을 지휘하며 ' +
+    '옥포·한산도·명량·노량 등 주요 해전을 모두 승리로 이끈 인물입니다. 전라좌수사 부임 후 ' +
+    '1년여 만에 판옥선과 거북선, 화포와 군량을 정비해 개전에 대비했고, 남해의 제해권을 확보해 ' +
+    '일본군의 서해 북상과 보급을 차단했습니다. 특히 1597년 명량해전에서는 13척으로 130여 척의 ' +
+    '일본 함대를 막아냈으며, 1598년 노량해전에서 전사했습니다. 직접 쓴 『난중일기』는 국보이자 ' +
+    '유네스코 세계기록유산으로, 전쟁의 실상과 한 인간의 내면을 함께 전하는 1차 사료입니다.';
+
+  const RESULTS = [
+    {
+      title: '이순신(李舜臣) - 한국민족문화대백과사전',
+      link: 'https://encykorea.aks.ac.kr/Article/E0047985',
+      snippet: '1545(인종 1)~1598(선조 31). 조선 중기의 무신. 본관은 덕수(德水), 자는 여해(汝諧), 시호는 충무(忠武). 1576년 무과에 급제하였고, 1591년 전라좌도수군절도사에 임명되어 임진왜란 발발에 대비하였다.',
+      reason: '한국학중앙연구원이 편찬한 표준 백과사전으로, 생몰년·관직·전투 기록의 근거가 명확합니다.',
+      score: 97, sourceType: 'official', date: '2024-11-12', paras: 9,
+      content: [
+        '이순신은 1545년 한성부 건천동에서 태어났다. 어린 시절 아버지를 따라 외가가 있는 충청도 아산으로 옮겨 자랐으며, 1576년 32세의 비교적 늦은 나이에 식년무과 병과로 급제하였다.',
+        '함경도 동구비보 권관, 발포만호, 조산보만호 등 변방의 직책을 두루 거쳤다. 1589년 정읍현감을 지냈고, 1591년 유성룡의 천거로 전라좌도수군절도사에 특진 임명되었다.',
+        '부임 직후 그는 관내 진영을 점검하고 판옥선을 수리하였으며, 새로이 거북선을 건조하고 화포를 시험하는 등 전쟁 대비에 착수하였다. 임진왜란이 일어난 것은 그로부터 1년 2개월 뒤였다.'
+      ]
+    },
+    {
+      title: '이순신과 임진왜란 해전 - 우리역사넷 (국사편찬위원회)',
+      link: 'https://contents.history.go.kr/front/kc/main.do?levelId=kc_i501500',
+      snippet: '옥포해전(1592.5)을 시작으로 사천·당포·한산도·부산포 해전에서 연승하며 남해의 제해권을 장악하였다. 이로써 일본군의 수륙병진 전략과 서해를 통한 보급로가 봉쇄되었다.',
+      reason: '국사편찬위원회가 운영하는 국가 역사 콘텐츠로, 사료에 근거한 서술입니다.',
+      score: 95, sourceType: 'official', date: '2025-02-03', paras: 11,
+      content: [
+        '1592년 4월 임진왜란이 발발하자 이순신은 5월 7일 옥포에서 일본 함선 26척을 격파하며 개전 이후 조선군의 첫 승리를 거두었다.',
+        '이어 사천해전에서 거북선을 처음 실전에 투입하였고, 당포·당항포·율포에서 연승하였다. 7월 한산도 앞바다에서는 학익진으로 와키자카 야스하루의 함대를 대파하였다.',
+        '9월에는 일본군의 근거지인 부산포를 직접 공격하였다. 잇단 해전 승리는 일본군의 서해 북상을 차단하여 전라도 곡창지대를 지켜냈고, 전쟁 전체의 흐름을 바꾸는 결정적 요인이 되었다.'
+      ]
+    },
+    {
+      title: '충무공 이순신 - 현충사관리소 | 국가유산청',
+      link: 'https://hcs.khs.go.kr/hcs/contents/H0201000000.do',
+      snippet: '현충사는 충무공 이순신의 위업을 기리기 위해 세운 사당이다. 유물전시관에는 국보 「이순신 난중일기 및 서간첩 임진장초」와 보물 「이순신 장검」 등이 전시되어 있다.',
+      reason: '국가유산청 산하 기관의 공식 안내로, 유물 지정 정보가 정확합니다.',
+      score: 93, sourceType: 'official', date: '2025-04-28', paras: 7,
+      content: [
+        '현충사는 충청남도 아산시 염치읍에 있으며, 1706년(숙종 32) 지방 유생들의 상소로 세워졌다. 이듬해 숙종이 "현충사"라는 편액을 내렸다.',
+        '경내에는 이순신이 성장한 옛집과 활을 쏘던 활터, 셋째 아들 이면의 묘가 남아 있다.',
+        '유물전시관에는 국보 제76호 『난중일기』를 비롯해 이순신이 사용한 장검, 교지, 영정 등이 보관·전시되어 있다.'
+      ]
+    },
+    {
+      title: '이순신 - 위키백과, 우리 모두의 백과사전',
+      link: 'https://ko.wikipedia.org/wiki/이순신',
+      snippet: '임진왜란 기간 동안 삼도수군통제사로서 조선 수군을 지휘하여 일본 수군과의 해전에서 연전연승하였다. 1598년 노량해전에서 전사하였으며, 사후 선무공신 1등에 책록되고 충무공 시호를 받았다.',
+      reason: '출처 각주가 충실하나 누구나 편집할 수 있는 문서이므로 세부 수치는 교차 확인이 필요합니다.',
+      score: 86, sourceType: 'other', date: '2025-07-19', paras: 24,
+      content: [
+        '이순신(李舜臣, 1545년 4월 28일 ~ 1598년 12월 16일)은 조선 중기의 무신이다. 본관은 덕수, 자는 여해, 시호는 충무이다.',
+        '1591년 전라좌도수군절도사가 되었고, 1593년에는 삼도수군통제사에 임명되어 경상·전라·충청 삼도의 수군을 총괄하였다.',
+        '1597년 모함으로 파직되어 백의종군하였으나, 칠천량 해전으로 수군이 궤멸하자 다시 통제사로 기용되어 명량에서 대승을 거두었다.'
+      ]
+    },
+    {
+      title: '난중일기, 유네스코 세계기록유산 등재 12주년',
+      link: 'https://www.yna.co.kr/view/AKR20250612044500005',
+      snippet: '이순신이 임진왜란 7년간 직접 기록한 『난중일기』가 유네스코 세계기록유산에 등재된 지 12년을 맞았다. 국보 제76호인 이 일기는 전쟁의 실상을 담은 세계적으로 드문 진중 기록으로 평가된다.',
+      reason: '주요 통신사 보도로 사실관계는 정확하나, 해석보다는 사실 전달 위주의 기사입니다.',
+      score: 84, sourceType: 'news', date: '2025-06-12', paras: 6,
+      content: [
+        '『난중일기』는 1592년 1월 1일부터 전사하기 이틀 전인 1598년 11월 17일까지의 기록을 담고 있다. 총 7책이 전해진다.',
+        '날씨와 군무, 부하 장수들과의 회의, 조정에 대한 답답함, 노모를 향한 그리움, 아들 이면의 전사 소식에 통곡한 밤까지 사적인 감정도 여과 없이 적혀 있다.',
+        '2013년 6월 유네스코 세계기록유산으로 등재되었으며, 원본은 현충사에 보관되어 있다.'
+      ]
+    },
+    {
+      title: '명량해전의 조류 조건에 관한 해양학적 재검토',
+      link: 'https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002751188',
+      snippet: '울돌목의 최대 유속과 전류(轉流) 시각을 수치모형으로 복원하여, 1597년 9월 16일 조선 수군이 조류 반전 시점을 전술적으로 활용했을 가능성을 검토하였다.',
+      reason: '학술지 게재 논문으로 방법론이 명시되어 있으나, 특정 가설을 검증하는 전문 연구입니다.',
+      score: 90, sourceType: 'academic', date: '2023-09-30', paras: 18,
+      content: [
+        '울돌목(명량)은 폭이 가장 좁은 곳이 약 300m에 불과하고, 조류 유속이 최대 11노트에 이르는 국내에서 가장 험한 물목 중 하나이다.',
+        '본 연구는 조석 수치모형을 통해 전투 당일의 유속 변화를 복원하였다. 그 결과 오전에는 북서류가, 정오 무렵 전류 이후에는 남동류가 우세했던 것으로 나타났다.',
+        '이는 조선 수군이 좁은 수로에서 소수의 함선으로 대규모 함대를 상대할 수 있었던 물리적 조건을 뒷받침한다. 다만 전투의 승패를 조류만으로 설명하는 것은 과도한 단순화이다.'
+      ]
+    },
+    {
+      title: '거북선은 정말 철갑선이었을까? — 자료로 보는 조선 수군',
+      link: 'https://blog.naver.com/history_note/223412998001',
+      snippet: '거북선 상갑판을 덮개로 씌우고 쇠못을 박았다는 기록은 있지만, 선체 전체를 철판으로 감쌌다는 당대 기록은 확인되지 않는다. 실제 주력은 튼튼한 판옥선과 우수한 조선 화포였다.',
+      reason: '개인 블로그이지만 원문 인용이 붙어 있습니다. 해석 부분은 필자의 견해입니다.',
+      score: 68, sourceType: 'blog', date: '2024-03-21', paras: 14,
+      content: [
+        '『이충무공전서』에 실린 귀선도설(龜船圖說)은 정조 대에 정리된 것으로, 임진왜란 당시의 거북선과 완전히 같다고 보기는 어렵다.',
+        '확실한 것은 상부를 덮개로 씌워 적의 등선육박전을 막았다는 점, 용머리에서 연기를 뿜었다는 점, 그리고 다수의 화포를 좌우와 전후에 배치했다는 점이다.',
+        '거북선은 함대의 주력이라기보다 적진을 먼저 뚫고 들어가 대형을 흩뜨리는 돌격선의 성격이 강했다. 임진왜란 중 동시에 운용된 수는 많아야 서너 척 수준으로 추정된다.'
+      ]
+    },
+    {
+      title: '이순신 장군 명언 모음 (원문 + 출처 정리)',
+      link: 'https://brunch.co.kr/@classic-lines/187',
+      snippet: '"必死則生 必生則死", "今臣戰船 尙有十二", "戰方急 愼勿言我死" — 널리 알려진 문장들의 출처와 원문 표기를 정리했습니다.',
+      reason: '인용문 출처를 밝히고 있으나 일부 문장은 후대 문헌에서 정리된 형태입니다.',
+      score: 63, sourceType: 'blog', date: '2024-08-14', paras: 10,
+      content: [
+        '"죽고자 하면 살 것이요, 살고자 하면 죽을 것이다"(必死則生 必生則死)는 명량해전을 앞두고 장수들에게 한 말로 『난중일기』 정유년 9월 15일자에 실려 있다.',
+        '"신에게는 아직 열두 척의 배가 남아 있사옵니다"(今臣戰船 尙有十二)는 수군을 폐하라는 조정의 명에 올린 장계의 한 구절로 전해진다.',
+        '"싸움이 급하니 나의 죽음을 알리지 말라"(戰方急 愼勿言我死)는 노량해전에서 남긴 마지막 말로 『이충무공행록』에 기록되어 있다.'
+      ]
+    },
+    {
+      title: '[토론] 23전 23승이라는 표현, 어디까지 맞는 말인가요?',
+      link: 'https://gall.dcinside.com/board/view/?id=history&no=1892034',
+      snippet: '전투를 어떻게 세느냐에 따라 숫자가 달라진다는 지적이 많습니다. 다만 이순신이 지휘한 해전 중 패전으로 분류되는 사례가 없다는 점에는 대체로 동의가 이루어집니다.',
+      reason: '커뮤니티 토론으로 검증되지 않은 주장이 섞여 있습니다. 참고용으로만 보세요.',
+      score: 34, sourceType: 'community', date: '2025-05-02', paras: 41,
+      content: [
+        '옥포·합포·적진포를 한 번의 출전으로 묶느냐 세 번의 전투로 세느냐에 따라 총 전투 횟수가 달라진다는 점이 반복해서 지적된다.',
+        '집계 방식에 따라 23전, 43전 등 다양한 숫자가 제시되지만, 이순신이 직접 지휘한 해전에서 패전 기록이 없다는 사실 자체는 논쟁의 대상이 아니다.',
+        '※ 커뮤니티 게시물 특성상 근거 없는 주장이 포함되어 있을 수 있습니다.'
+      ]
+    },
+    {
+      title: '노량해전 427주년 추모 행사… "7년 전쟁의 마지막 새벽"',
+      link: 'https://www.hani.co.kr/arti/culture/culture_general/1174820.html',
+      snippet: '1598년 11월 19일 새벽, 철수하는 일본 함대를 노량 앞바다에서 요격하던 이순신은 적탄에 맞아 전사했다. 이 전투를 끝으로 임진왜란은 막을 내렸다.',
+      reason: '일간지 문화면 기사로 사실관계는 정확하며, 행사 소식과 역사 서술이 함께 실려 있습니다.',
+      score: 79, sourceType: 'news', date: '2025-11-19', paras: 8,
+      content: [
+        '도요토미 히데요시가 사망하자 일본군은 철수를 시작했다. 이순신은 명나라 진린의 함대와 연합하여 퇴로를 차단하고 노량에서 마지막 결전을 벌였다.',
+        '새벽 전투 중 이순신은 왼쪽 가슴에 총탄을 맞았다. "싸움이 급하니 나의 죽음을 알리지 말라"는 말을 남겼고, 조카 이완이 대신 기를 잡고 전투를 끝까지 지휘했다고 전한다.',
+        '전투 결과 일본 함선 200여 척이 격침되거나 나포되었다. 7년에 걸친 전쟁은 이 전투를 끝으로 마무리되었다.'
+      ]
+    }
+  ];
+
+  /* AI 채팅 자동 응답 — 주제를 바꿔가며 점점 더 자세히 이어집니다 */
+  const CHAT_ANSWERS = [
+    {
+      topic: '이순신은 누구인가',
+      body:
+        '**이순신(李舜臣, 1545~1598)**은 조선 중기의 무신으로, 임진왜란 7년 동안 조선 수군을 지휘한 인물입니다.\n\n' +
+        '**기본 사항**\n' +
+        '- 본관 덕수(德水) · 자 여해(汝諧) · 시호 충무(忠武)\n' +
+        '- 1545년 한성부 건천동(현재 서울 인현동 부근) 출생\n' +
+        '- 1576년 식년무과 병과 급제 (32세)\n' +
+        '- 1591년 전라좌도수군절도사\n' +
+        '- 1593년 초대 삼도수군통제사\n' +
+        '- 1598년 11월 19일 노량해전에서 전사 (54세)\n\n' +
+        '**왜 중요한가**\n' +
+        '임진왜란에서 일본군의 전략은 육군이 북상하고 수군이 서해를 돌아 물자를 실어 나르는 수륙병진이었습니다. ' +
+        '이순신이 남해의 제해권을 지켜내면서 이 계획이 무너졌습니다. 일본군은 육로로만 보급해야 했고, ' +
+        '전라도 곡창지대를 끝내 손에 넣지 못했습니다. 개별 전투의 승리보다 이 구조적 차단이 훨씬 큰 결과를 낳았습니다.\n\n' +
+        '**흔한 오해 하나**\n' +
+        '그는 타고난 천재라기보다 준비가 철저했던 지휘관에 가깝습니다. 무과 급제도 늦었고, 두 차례 파직과 백의종군을 겪었습니다.'
+    },
+    {
+      topic: '출생과 성장, 그리고 무과 급제까지',
+      body:
+        '**어린 시절**\n' +
+        '이순신은 1545년 한성 건천동에서 이정(李貞)의 셋째 아들로 태어났습니다. 집안은 문반 가문이었지만 ' +
+        '조부 이백록이 기묘사화에 연루된 뒤로 형편이 기울었습니다. 어린 시절 어머니 변씨를 따라 외가가 있는 ' +
+        '충청도 아산으로 옮겨 자랐고, 지금의 현충사 자리가 그가 살던 옛집입니다.\n\n' +
+        '**늦은 급제**\n' +
+        '- 1572년, 28세에 첫 무과 응시 — 말에서 떨어져 다리가 부러지며 낙방했습니다. 버드나무 가지로 다리를 싸매고 ' +
+        '시험을 마쳤다는 일화가 전합니다.\n' +
+        '- 1576년, 32세에 식년무과 병과 4등으로 급제했습니다. 당시 기준으로도 이른 나이가 아니었습니다.\n\n' +
+        '**성격을 보여주는 일화**\n' +
+        '발포만호 시절, 직속상관이 관사 뜰의 오동나무를 베어 거문고를 만들라 하자 "관물(官物)이므로 사사로이 벨 수 없다"며 거절했습니다. ' +
+        '이런 태도는 그를 여러 번 곤경에 빠뜨렸지만, 동시에 그의 기록과 보고가 신뢰받는 이유이기도 했습니다.'
+    },
+    {
+      topic: '관직 이력과 전라좌수사 발탁',
+      body:
+        '**변방을 돌던 15년**\n' +
+        '급제 후 그가 맡은 자리는 대부분 변방이었습니다.\n' +
+        '- 함경도 동구비보 권관 (첫 부임)\n' +
+        '- 훈련원 봉사, 충청병사 군관\n' +
+        '- 전라도 발포만호 — 수군 지휘 경험을 처음 쌓은 자리\n' +
+        '- 함경도 조산보만호 겸 녹둔도 둔전관\n' +
+        '- 1589년 정읍현감\n\n' +
+        '**녹둔도 사건**\n' +
+        '1587년 녹둔도에서 여진족의 기습을 받았습니다. 이순신은 증원을 요청했으나 거절당한 상태였고, ' +
+        '전투 후 오히려 패전 책임을 물어 백의종군하게 됩니다. 첫 번째 백의종군이었습니다.\n\n' +
+        '**파격 승진**\n' +
+        '1591년 2월, 유성룡의 천거로 정읍현감(종6품)에서 전라좌도수군절도사(정3품)로 뛰어올랐습니다. ' +
+        '여러 품계를 건너뛴 이례적 인사여서 사간원의 반대가 잇따랐지만 선조가 밀어붙였습니다. ' +
+        '결과적으로 이 인사가 전쟁의 향방을 갈랐습니다.'
+    },
+    {
+      topic: '개전 전 1년 2개월, 무엇을 준비했나',
+      body:
+        '전라좌수사 부임이 1591년 2월, 임진왜란 발발이 1592년 4월. **단 1년 2개월**이 그에게 주어진 시간이었습니다.\n\n' +
+        '**그가 한 일**\n' +
+        '- 관내 5관 5포의 진영과 무기고를 직접 순시하며 점검\n' +
+        '- 낡은 판옥선을 수리하고 새로 건조\n' +
+        '- 거북선을 새로 만들어 화포를 얹음\n' +
+        '- 지자포·현자포 등 화포를 확충하고 화약을 비축\n' +
+        '- 사부(활 쏘는 병사)와 격군(노 젓는 병사)을 나누어 반복 훈련\n' +
+        '- 어민과 피란민에게서 적정을 수집하는 정탐망 구성\n\n' +
+        '**결정적 기록**\n' +
+        '『난중일기』 1592년 4월 12일자에 거북선에서 지자포와 현자포를 시험 발사했다는 기록이 있습니다. ' +
+        '임진왜란 발발이 4월 13일입니다. 하루 차이였습니다.\n\n' +
+        '전쟁이 터졌을 때 조선 수군 중 즉시 출동 가능한 상태였던 것은 사실상 전라좌수영뿐이었습니다.'
+    },
+    {
+      topic: '판옥선과 화포 — 조선 수군의 실제 강점',
+      body:
+        '이순신의 승리를 이해하려면 **배와 대포의 차이**를 먼저 봐야 합니다.\n\n' +
+        '**판옥선 vs 일본 함선**\n' +
+        '- 판옥선은 바닥이 평평한 평저선입니다. 조수 간만 차가 크고 물살이 복잡한 남해에서 제자리 회전이 가능했습니다.\n' +
+        '- 소나무를 두껍게 쓰고 나무못으로 결구해 선체가 튼튼했습니다. 화포의 반동을 견딜 수 있었습니다.\n' +
+        '- 갑판이 2층이라 위치가 높았습니다. 일본군의 주특기인 등선육박전(배에 뛰어올라 칼로 싸우기)이 어려웠습니다.\n' +
+        '- 일본의 주력선 세키부네는 빠르지만 얇고, 화포를 쏘면 선체가 버티지 못했습니다.\n\n' +
+        '**화포의 격차**\n' +
+        '조선은 천자·지자·현자·황자총통 등 함포를 운용했고, 사거리가 일본의 조총보다 훨씬 길었습니다. ' +
+        '일본군은 접근해서 백병전을 해야 이기고, 조선군은 거리를 두고 포격해야 이기는 구조였습니다.\n\n' +
+        '이순신의 전술은 거의 예외 없이 **"붙지 않고 때린다"**로 요약됩니다. 지형과 조류를 고른 것도 이 거리를 유지하기 위해서였습니다.'
+    },
+    {
+      topic: '거북선의 실제 모습',
+      body:
+        '**거북선(龜船)**은 판옥선을 개량한 돌격용 전선입니다.\n\n' +
+        '**확실한 것**\n' +
+        '- 상갑판을 덮개로 씌우고 쇠못과 송곳을 박아 적이 뛰어오르지 못하게 했습니다.\n' +
+        '- 용머리에서 연기를 뿜어 시야를 가리고 적을 위압했습니다.\n' +
+        '- 좌우·전후에 화포 구멍을 내어 사방으로 사격할 수 있었습니다.\n' +
+        '- 1592년 5월 사천해전에서 처음 실전 투입되었습니다.\n\n' +
+        '**불확실한 것**\n' +
+        '흔히 알려진 "철갑선"이라는 설명은 근거가 약합니다. 덮개에 쇠못을 박았다는 기록은 있지만 ' +
+        '선체 전체를 철판으로 감쌌다는 당대 기록은 없습니다. 우리가 아는 거북선 그림(귀선도설)은 ' +
+        '정조 대에 편찬된 『이충무공전서』에 실린 것으로, 200년 뒤의 복원도입니다.\n\n' +
+        '**오해 하나 더**\n' +
+        '거북선은 함대의 주력이 아니었습니다. 동시에 운용된 수는 많아야 서너 척으로 추정됩니다. ' +
+        '적진을 먼저 뚫고 들어가 대형을 흩뜨리는 **선봉 돌격선**이었고, 주력은 어디까지나 판옥선이었습니다.'
+    },
+    {
+      topic: '1592년 1차 출전 — 옥포·합포·적진포',
+      body:
+        '**첫 승리, 옥포해전 (1592년 5월 7일)**\n' +
+        '개전 후 조선군은 육지에서 연패하고 있었습니다. 이순신은 경상우수사 원균의 구원 요청을 받고 출전합니다. ' +
+        '옥포만에 정박해 상륙 약탈 중이던 일본 함대를 기습해 **26척을 격침**했습니다.\n\n' +
+        '**이어진 전투**\n' +
+        '- 같은 날 오후 합포에서 5척\n' +
+        '- 다음 날 적진포에서 11척\n\n' +
+        '**의미**\n' +
+        '- 개전 이후 조선군의 **첫 승전보**였습니다. 육지에서 밀리기만 하던 상황에서 이 소식은 컸습니다.\n' +
+        '- 조선 수군은 단 한 척도 잃지 않았습니다.\n' +
+        '- 전투 방식이 확립되었습니다. 정박 중이거나 대형이 흐트러진 적을 화포 사거리 밖에서부터 두들기고, ' +
+        '접근을 허용하지 않는 방식입니다.\n\n' +
+        '이 승리로 이순신은 가선대부로 승진했고, 조정은 비로소 수군의 존재를 인식하게 됩니다.'
+    },
+    {
+      topic: '2차 출전 — 사천·당포·당항포, 그리고 거북선의 데뷔',
+      body:
+        '**사천해전 (1592년 5월 29일)**\n' +
+        '거북선이 처음 실전에 투입된 전투입니다. 좁은 포구에 있던 적을 넓은 바다로 유인한 뒤 거북선을 앞세워 돌격, ' +
+        '13척을 격파했습니다. 이 전투에서 **이순신 자신도 왼쪽 어깨에 총상**을 입었습니다. ' +
+        '『난중일기』에는 상처에서 뽑아낸 탄환 이야기가 담담하게 적혀 있습니다.\n\n' +
+        '**연속 전투**\n' +
+        '- 당포해전 (6월 2일) — 적장 구루시마 미치유키 전사, 21척 격파\n' +
+        '- 당항포해전 (6월 5일) — 26척 격파\n' +
+        '- 율포해전 (6월 7일) — 7척 격파\n\n' +
+        '**유인 전술의 확립**\n' +
+        '이 시기에 그의 전형적인 패턴이 자리 잡습니다. 좁은 포구에 웅크린 적은 치기 어렵습니다. ' +
+        '소수의 배로 도발해 넓은 바다로 끌어낸 뒤, 대기하던 본대가 포위해 포격하는 방식입니다. ' +
+        '한 달 뒤 한산도에서 이 전술이 완성된 형태로 나타납니다.'
+    },
+    {
+      topic: '한산도 대첩과 학익진',
+      body:
+        '**한산도 대첩 (1592년 7월 8일)** — 임진왜란 3대첩 중 하나입니다.\n\n' +
+        '**상황**\n' +
+        '연패에 놀란 일본은 와키자카 야스하루에게 대규모 함대를 주어 조선 수군을 격멸하라고 명했습니다. ' +
+        '일본 함대는 견내량이라는 좁은 해협에 있었습니다. 좁고 암초가 많아 조선 함대가 들어가면 오히려 불리한 곳이었습니다.\n\n' +
+        '**전개**\n' +
+        '1. 판옥선 5~6척으로 도발해 일본 함대를 견내량 밖으로 끌어냅니다.\n' +
+        '2. 넓은 한산도 앞바다에 이르자 도망치던 배들이 방향을 돌립니다.\n' +
+        '3. 대기하던 본대가 **학익진(鶴翼陣)** — 학이 날개를 펴듯 반원형으로 벌려 적을 감쌉니다.\n' +
+        '4. 사방에서 화포를 집중 사격합니다.\n\n' +
+        '**결과와 의미**\n' +
+        '일본 함선 약 59척이 격침·나포되었습니다. 이 패배 이후 도요토미 히데요시는 조선 수군과의 ' +
+        '**해전을 금지**하는 명령을 내립니다. 일본 수군은 이후 한동안 부산 일대에 웅크리게 되고, ' +
+        '수륙병진 전략은 사실상 폐기됩니다.'
+    },
+    {
+      topic: '부산포 해전 — 적의 심장부를 치다',
+      body:
+        '**부산포 해전 (1592년 9월 1일)**\n\n' +
+        '**왜 위험했나**\n' +
+        '부산포는 일본군의 본거지였습니다. 함선 470여 척이 정박해 있었고, 해안 고지대마다 조총병이 배치되어 있었습니다. ' +
+        '바다에서 육지를 향해 공격하는 것은 수군에게 가장 불리한 상황입니다.\n\n' +
+        '**전개**\n' +
+        '이순신은 그럼에도 진입해 정박 중인 함선 **100여 척을 파괴**했습니다. 다만 배를 버리고 육지로 올라간 ' +
+        '일본군까지 추격하지는 않았습니다. 상륙전은 수군의 몫이 아니라고 판단한 것입니다.\n\n' +
+        '**대가**\n' +
+        '이 전투에서 녹도만호 **정운**이 전사했습니다. 이순신이 가장 아끼던 장수 중 하나였고, ' +
+        '『난중일기』에도 그의 죽음을 애통해하는 기록이 남아 있습니다.\n\n' +
+        '**의미**\n' +
+        '적의 보급 기지를 직접 타격함으로써, 일본군은 후방이 안전하지 않다는 사실을 확인하게 되었습니다. ' +
+        '1592년 한 해의 해전은 이 전투로 마무리됩니다.'
+    },
+    {
+      topic: '삼도수군통제사 — 싸우지 않는 동안 한 일',
+      body:
+        '1593년 8월, 이순신은 **초대 삼도수군통제사**로 임명되어 경상·전라·충청 삼도의 수군을 총괄하게 됩니다. ' +
+        '본영을 한산도로 옮겼습니다.\n\n' +
+        '**전투가 없던 시기가 더 어려웠습니다**\n' +
+        '1593년부터 1596년까지는 명나라와 일본의 강화 교섭으로 큰 해전이 드물었습니다. ' +
+        '문제는 군량이었습니다. 조정은 보급을 제대로 하지 못했고, 수군은 스스로 먹어야 했습니다.\n\n' +
+        '**그가 벌인 일들**\n' +
+        '- **둔전(屯田)** — 병사들이 직접 농사를 지어 군량을 조달\n' +
+        '- **소금 굽기와 고기잡이** — 소금을 구워 곡식과 교환\n' +
+        '- **피란민 수용** — 섬에 정착시켜 농사를 짓게 하고, 그 소출의 일부를 군량으로\n' +
+        '- **총통과 화약 제작** — 자체 생산 체계 구축\n' +
+        '- **군사 훈련과 진법 연습의 상시화**\n\n' +
+        '전쟁은 전투로만 이루어지지 않습니다. 명량에서 13척으로 버틸 수 있었던 기반도 이 시기에 만들어졌습니다.'
+    },
+    {
+      topic: '정유재란, 파직, 두 번째 백의종군',
+      body:
+        '**1597년, 가장 어두운 해**\n\n' +
+        '**발단**\n' +
+        '일본은 이순신을 제거하기 위해 이중간첩 요시라를 통해 거짓 정보를 흘립니다. ' +
+        '"가토 기요마사가 언제 어느 바다로 건너온다"는 정보였습니다. 조정은 출동을 명했지만 ' +
+        '이순신은 함정으로 판단하고 움직이지 않았습니다.\n\n' +
+        '**결과**\n' +
+        '- 항명죄로 체포되어 한양으로 압송\n' +
+        '- 국문을 받고 고문을 당함\n' +
+        '- 정탁 등의 구명으로 겨우 목숨을 건지고 **백의종군** (두 번째)\n\n' +
+        '**그 사이 일어난 일**\n' +
+        '백의종군 길에서 그는 어머니의 부고를 듣습니다. 아들을 보러 배를 타고 오던 중 세상을 떠난 것이었습니다. ' +
+        '『난중일기』 1597년 4월 19일자에는 이렇게 적혀 있습니다.\n\n' +
+        '"어찌하랴, 어찌하랴. 천지에 나 같은 사정이 또 어디 있으랴."\n\n' +
+        '상복도 제대로 입지 못한 채 그는 남쪽으로 걸어갔습니다.'
+    },
+    {
+      topic: '칠천량 해전 — 조선 수군의 궤멸',
+      body:
+        '**1597년 7월 16일**, 이순신 대신 삼도수군통제사가 된 원균이 지휘한 전투입니다.\n\n' +
+        '**경과**\n' +
+        '조정과 도원수 권율의 거듭된 출전 독촉에 원균은 함대를 이끌고 부산 방면으로 나아갔습니다. ' +
+        '장거리 항해로 격군들이 지친 상태에서 칠천량에 정박했고, 그날 밤 일본 수군의 기습을 받았습니다.\n\n' +
+        '**결과**\n' +
+        '- 판옥선 대부분이 침몰하거나 나포됨\n' +
+        '- 원균 전사, 전라우수사 이억기·충청수사 최호 전사\n' +
+        '- 경상우수사 배설이 12척을 이끌고 이탈해 살아남음\n\n' +
+        '**남은 것**\n' +
+        '5년 동안 쌓아 올린 조선 수군이 하룻밤에 사라졌습니다. 남해의 제해권도 함께 넘어갔습니다. ' +
+        '다급해진 조정은 백의종군 중이던 이순신을 다시 통제사로 임명합니다. ' +
+        '그가 받은 것은 배설이 가져온 배 12척, 그리고 흩어진 병사들이었습니다.'
+    },
+    {
+      topic: '명량해전 — 13척의 계산',
+      body:
+        '**1597년 9월 16일, 울돌목**\n\n' +
+        '**"신에게는 아직 열두 척이 있사옵니다"**\n' +
+        '조정이 수군을 폐하고 육군에 합류하라 명하자 그는 장계를 올립니다.\n' +
+        '"今臣戰船 尙有十二 — 신에게는 아직 열두 척의 전선이 남아 있사옵니다."\n' +
+        '이후 한 척이 더 합류해 13척이 되었습니다.\n\n' +
+        '**왜 울돌목이었나**\n' +
+        '- 가장 좁은 곳의 폭이 약 300m로, 대함대가 한꺼번에 들어올 수 없습니다.\n' +
+        '- 조류 유속이 최대 11노트에 이릅니다. 노를 젓는 배에게는 물살 자체가 전력입니다.\n' +
+        '- 정오 무렵 조류가 역전됩니다. 이 시각을 알고 싸우는 쪽과 모르고 싸우는 쪽의 차이는 큽니다.\n\n' +
+        '**전투**\n' +
+        '초반에는 이순신의 대장선 한 척만이 앞으로 나가 버텼습니다. 다른 배들은 겁을 먹고 물러나 있었습니다. ' +
+        '그가 홀로 적진 앞에서 포격을 계속하자 안위와 김응함의 배가 합류했고, 이후 전 함대가 따라붙습니다. ' +
+        '적장 **구루시마 미치후사**가 전사하고 그 시신이 물에 떠오르자 일본 함대의 사기가 무너졌습니다.\n\n' +
+        '**결과**\n' +
+        '일본 함선 31척이 격침되고, 130여 척의 함대가 물러났습니다. 조선 수군은 배를 한 척도 잃지 않았습니다. ' +
+        '이 승리로 일본군의 서해 진출은 다시 좌절되었습니다.'
+    },
+    {
+      topic: '전쟁 속의 개인 — 아들 이면의 죽음',
+      body:
+        '명량 승리로부터 한 달도 지나지 않은 **1597년 10월**, 이순신은 아산에서 온 편지를 받습니다.\n\n' +
+        '**셋째 아들 이면(李葂)**이 고향을 침범한 일본군과 싸우다 전사했다는 소식이었습니다. 스물한 살이었습니다.\n\n' +
+        '『난중일기』 10월 14일자입니다.\n\n' +
+        '"간담이 타고 찢어지는 것 같다. 하늘이 어찌 이렇게도 어질지 못한가. 내가 죽고 네가 사는 것이 마땅한 이치인데, ' +
+        '네가 죽고 내가 살았으니 어찌 이렇게 어그러진 이치가 있겠는가."\n\n' +
+        '그리고 다음 날, 그는 소금 굽는 사람의 방에 들어가 아무도 모르게 통곡했다고 적었습니다. ' +
+        '총사령관이 병사들 앞에서 울 수 없었기 때문입니다.\n\n' +
+        '『난중일기』가 특별한 이유가 여기 있습니다. 전공을 기록한 문서가 아니라, ' +
+        '**이기고 있는 사람의 무너지는 내면**까지 남아 있는 기록이라는 점입니다.'
+    },
+    {
+      topic: '노량해전과 최후',
+      body:
+        '**1598년 11월 19일 새벽, 노량 앞바다**\n\n' +
+        '**배경**\n' +
+        '8월에 도요토미 히데요시가 사망하고 일본군에 철수령이 내려졌습니다. 순천에 고립된 고니시 유키나가는 ' +
+        '뇌물을 써서 퇴로를 열어 달라고 요청했고, 명나라 진린은 흔들렸지만 이순신은 거부했습니다. ' +
+        '"이 원수를 없애면 죽어도 여한이 없겠다"고 했습니다.\n\n' +
+        '**전투**\n' +
+        '고니시를 구하러 온 시마즈 요시히로의 함대 500여 척과 조명 연합함대가 노량에서 충돌했습니다. ' +
+        '야간부터 새벽까지 이어진 격전에서 일본 함선 200여 척이 격침·나포되었습니다.\n\n' +
+        '**최후**\n' +
+        '추격하던 중 이순신은 왼쪽 가슴에 총탄을 맞습니다. 그가 남긴 말은 이것입니다.\n\n' +
+        '"戰方急 愼勿言我死 — 싸움이 급하니 나의 죽음을 알리지 말라."\n\n' +
+        '조카 이완이 그를 방패로 가리고 대신 기를 잡아 전투를 끝까지 지휘했다고 『이충무공행록』은 전합니다. ' +
+        '이 전투를 끝으로 **7년 전쟁이 막을 내렸습니다.**'
+    },
+    {
+      topic: '난중일기 — 무엇이 적혀 있나',
+      body:
+        '**『난중일기(亂中日記)』**는 이순신이 1592년 1월 1일부터 전사 이틀 전인 1598년 11월 17일까지 쓴 진중 일기입니다.\n\n' +
+        '**지정 현황**\n' +
+        '- 국보 제76호 (「이순신 난중일기 및 서간첩 임진장초」)\n' +
+        '- 2013년 6월 **유네스코 세계기록유산** 등재\n' +
+        '- 총 7책, 원본은 아산 현충사 소장\n\n' +
+        '**무엇이 적혀 있나**\n' +
+        '- 매일의 날씨 — 해전의 조건을 판단하는 자료였습니다\n' +
+        '- 군무와 회의, 병사들의 상벌\n' +
+        '- 활쏘기 연습 기록\n' +
+        '- 조정과 상관에 대한 답답함, 원균과의 갈등\n' +
+        '- 어머니에 대한 그리움, 아들의 죽음, 병으로 앓아누운 밤\n' +
+        '- 꿈 이야기\n\n' +
+        '**사료로서의 가치**\n' +
+        '전쟁을 지휘한 최고 사령관이 매일 직접 기록한 일기는 세계적으로도 드뭅니다. ' +
+        '게다가 후일의 평가를 의식해 다듬은 흔적이 거의 없습니다. 자신에게 불리한 내용도 그대로 남아 있습니다. ' +
+        '그래서 임진왜란 연구의 **1차 사료**로 다뤄집니다.'
+    },
+    {
+      topic: '임진장초 — 보고서에 담긴 지휘관의 얼굴',
+      body:
+        '『난중일기』가 사적인 기록이라면, **『임진장초(壬辰狀草)』**는 이순신이 조정에 올린 **장계(보고서)의 초안 모음**입니다.\n\n' +
+        '**특징**\n' +
+        '- 전투가 끝날 때마다 경과·전과·손실을 상세히 보고했습니다.\n' +
+        '- 격침한 배의 수뿐 아니라 **전사한 병사의 이름과 신분을 일일이 적었습니다.** ' +
+        '노비 출신 격군의 이름까지 남아 있습니다.\n' +
+        '- 공을 세운 부하의 이름을 빠짐없이 올려 포상을 요청했습니다.\n' +
+        '- 반대로 자신의 공은 절제된 표현으로 적었습니다.\n\n' +
+        '**왜 중요한가**\n' +
+        '이 문서 덕분에 우리는 400년 전 해전의 날짜, 참여 함선 수, 지휘관 배치, 사상자까지 구체적으로 알 수 있습니다. ' +
+        '많은 전쟁 기록이 승리의 규모만 남기는 것과 대조됩니다.\n\n' +
+        '전사자의 이름을 적는 일은 행정 절차가 아니라 태도의 문제입니다. 그의 지휘 방식이 여기 드러납니다.'
+    },
+    {
+      topic: '사후의 추숭 — 충무공이 되기까지',
+      body:
+        '**직후**\n' +
+        '- 1598년 전사 직후 우의정에 추증\n' +
+        '- 1604년 **선무공신 1등**에 책록되고 덕풍부원군에 추봉\n' +
+        '- 1643년 **충무(忠武)** 시호를 받음. 이때부터 "충무공"으로 불립니다.\n' +
+        '- 1793년 정조에 의해 영의정에 추증\n\n' +
+        '**남은 자취**\n' +
+        '- **현충사** (충남 아산) — 1706년 지방 유생들의 상소로 건립, 이듬해 숙종이 편액을 내림\n' +
+        '- **충렬사** (경남 통영), **충민사** (전남 여수) 등 여러 사당\n' +
+        '- **『이충무공전서』** — 1795년 정조의 명으로 규장각에서 편찬. 난중일기·임진장초·행록·귀선도설을 집대성한 문헌으로, ' +
+        '오늘날 거북선 그림도 여기서 나왔습니다.\n\n' +
+        '**기억의 방식**\n' +
+        '흥미로운 것은 그를 기린 것이 왕실보다 백성과 지방 유생이 먼저였다는 점입니다. ' +
+        '현충사도 조정이 아니라 유생들의 상소에서 시작되었습니다.'
+    },
+    {
+      topic: '평가 — 신화와 사실을 나누면',
+      body:
+        '**사실인 것**\n' +
+        '- 그가 직접 지휘한 해전에서 **패전 기록이 없습니다.** 집계 방식에 따라 23전, 43전 등으로 숫자가 달라지지만 ' +
+        '이 사실 자체는 논쟁 대상이 아닙니다.\n' +
+        '- 명량에서 13척으로 130여 척을 물리친 것도 사료로 확인됩니다.\n' +
+        '- 전투 손실이 극히 적었습니다. 여러 해전에서 판옥선을 한 척도 잃지 않았습니다.\n\n' +
+        '**과장된 것**\n' +
+        '- 거북선을 철갑선으로 보는 설명\n' +
+        '- 거북선이 함대의 주력이었다는 인식\n' +
+        '- 모든 것을 혼자 해냈다는 서술 — 이억기, 정운, 어영담, 나대용 같은 유능한 부하들이 있었습니다.\n\n' +
+        '**그래서 무엇이 남는가**\n' +
+        '그는 초자연적인 인물이 아니었습니다. 지형과 조류를 조사하고, 무기의 사거리를 계산하고, ' +
+        '정보를 모으고, 병사와 피란민을 먹이고, 매일 기록했습니다. 그리고 두 번의 파직과 고문, ' +
+        '어머니와 아들의 죽음을 겪으면서도 자리를 지켰습니다.\n\n' +
+        '"必死則生 必生則死 — 죽고자 하면 살 것이요, 살고자 하면 죽을 것이다."\n\n' +
+        '기적이 아니라 준비와 인내가 만든 결과였습니다.'
+    }
+  ];
+
+  function answerAt(i) {
+    const n = CHAT_ANSWERS.length;
+    const cur = CHAT_ANSWERS[i % n];
+    const next = CHAT_ANSWERS[(i + 1) % n];
+    const round = Math.floor(i / n);
+    const head = round > 0 && i % n === 0
+      ? '앞서 다룬 주제를 처음부터 다시, 조금 다른 각도로 이어가겠습니다.\n\n'
+      : '';
+    return head + cur.body +
+      '\n\n⟶ 이어서 설명할 내용: **' + next.topic + '** (아무거나 입력하시면 계속됩니다)';
+  }
+
+  /* ───────── 상태 ───────── */
+  let searchHistory = [];
+  let bookmarks = [];
+  let currentRanked = [];
+  let currentQuery = '';
+  let activeFilter = 'all';
+  let chatIdx = 0;
+  let standaloneIdx = 0;
+  let searchCount = 0;
+
+  /* ───────── 요소 ───────── */
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const searchHero = $('search-hero');
+  const searchInput = $('search-input');
+  const searchBtn = $('search-btn');
+  const loadingArea = $('loading-area');
+  const splitContainer = $('split-container');
+  const errorArea = $('error-area');
+  const resultQuery = $('result-query');
+  const aiSummary = $('ai-summary');
+  const resultsList = $('results-list');
+  const historyList = $('history-list');
+  const clearHistoryBtn = $('clear-history-btn');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const lowQualityBanner = $('low-quality-banner');
+  const browserPanel = $('browser-panel');
+  const browserUrl = $('browser-url');
+  const chatPanel = $('chat-panel');
+  const chatMessages = $('chat-messages');
+  const chatInput = $('chat-input');
+  const chatSend = $('chat-send');
+  const standaloneMessages = $('standalone-chat-messages');
+  const standaloneInput = $('standalone-chat-input');
+  const standaloneSend = $('standalone-chat-send');
+  const scoreThreshold = $('score-threshold');
+  const thresholdValue = $('threshold-value');
+  const sortModeSelect = $('sort-mode');
+  const resultCountSelect = $('result-count');
+
+  /* ───────── 탭 전환 ───────── */
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      navBtns.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      $(`tab-${tab}`).classList.add('active');
+      if (tab === 'search') {
+        errorArea.classList.add('hidden');
+        if (splitContainer.classList.contains('hidden')) searchHero.style.display = '';
+        resetSteps();
+      }
+      if (tab === 'chat') standaloneInput.focus();
+      if (tab === 'bookmarks') renderBookmarks();
+      if (tab === 'stats') renderStats();
+    });
+  });
+
+  /* ───────── 테마 ───────── */
+  function applyTheme(theme) {
+    if (theme === 'system') {
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    document.body.style.background = theme === 'null' ? 'transparent' : '';
+  }
+  document.querySelectorAll('input[name="theme"]').forEach(r => {
+    r.addEventListener('change', () => applyTheme(r.value));
+  });
+  applyTheme('dark');
+
+  /* ───────── 접이식 패널 ───────── */
+  function bindToggle(btnId, panelId, chevId) {
+    const btn = $(btnId), panel = $(panelId), chev = $(chevId);
+    if (!btn || !panel) return;
+    btn.addEventListener('click', () => {
+      panel.classList.toggle('hidden');
+      if (chev) chev.style.transform = panel.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    });
+  }
+  bindToggle('instruction-toggle', 'instruction-panel', 'instruction-chevron');
+  bindToggle('filter-toggle', 'filter-panel', 'filter-chevron');
+
+  document.querySelectorAll('.instruction-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const on = chip.classList.toggle('active');
+      const input = $('ai-instruction');
+      if (on) input.value = chip.dataset.instruction;
+      else if (input.value === chip.dataset.instruction) input.value = '';
+    });
+  });
+
+  /* ───────── 검색 ───────── */
+  function setStepActive(step) {
+    const el = $(`step-${step}`);
+    el.classList.add('active');
+    el.querySelector('.step-icon').innerHTML = '<div class="spinner"></div>';
+  }
+  function setStepDone(step) {
+    const el = $(`step-${step}`);
+    el.classList.remove('active');
+    el.classList.add('done');
+    el.querySelector('.step-icon').innerHTML = '<span class="step-check">&#x2713;</span>';
+  }
+  function resetSteps() {
+    ['google', 'ai'].forEach(step => {
+      const el = $(`step-${step}`);
+      el.classList.remove('active', 'done');
+      el.querySelector('.step-icon').innerHTML = step === 'google'
+        ? '<div class="spinner"></div>' : '<div class="step-pending"></div>';
+    });
+  }
+
+  function doSearch(query) {
+    query = (query || '').trim();
+    if (!query) return;
+
+    currentQuery = query;
+    searchHero.style.display = 'none';
+    errorArea.classList.add('hidden');
+    splitContainer.classList.add('hidden');
+    closeBrowser();
+    closeChat();
+    resetSteps();
+    loadingArea.classList.remove('hidden');
+    setStepActive('google');
+
+    setTimeout(() => {
+      setStepDone('google');
+      setStepActive('ai');
+      setTimeout(() => {
+        setStepDone('ai');
+        setTimeout(() => {
+          loadingArea.classList.add('hidden');
+          showResults(query);
+        }, 260);
+      }, 7500);
+    }, 800);
+  }
+
+  function applySorting(list) {
+    const mode = sortModeSelect ? sortModeSelect.value : 'score-desc';
+    const s = [...list];
+    if (mode === 'score-desc') s.sort((a, b) => b.score - a.score);
+    else if (mode === 'score-asc') s.sort((a, b) => a.score - b.score);
+    return s;
+  }
+
+  function showResults(query) {
+    const count = resultCountSelect ? parseInt(resultCountSelect.value) || 10 : 10;
+    let ranked = applySorting(RESULTS).slice(0, count);
+    currentRanked = ranked;
+    activeFilter = 'all';
+    filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+
+    resultQuery.textContent = `"${query}" - ${ranked.length}개 결과 (신뢰도순)`;
+    aiSummary.innerHTML =
+      '<div class="ai-summary-header"><span>&#x1F50D;</span> AI 요약</div>' +
+      `<div class="ai-summary-text">${escapeHtml(SUMMARY)}</div>`;
+
+    renderResultCards(ranked);
+    resetChatPanel();
+    splitContainer.classList.remove('hidden');
+    checkLowQualityBanner(ranked);
+
+    addToHistory(query);
+    searchCount++;
+  }
+
+  function checkLowQualityBanner(ranked) {
+    if (!ranked.length) { lowQualityBanner.classList.add('hidden'); return; }
+    const avg = ranked.reduce((s, r) => s + r.score, 0) / ranked.length;
+    const communityRatio = ranked.filter(r => r.sourceType === 'community').length / ranked.length;
+    lowQualityBanner.classList.toggle('hidden', !(avg < 70 || communityRatio >= 0.5));
+  }
+
+  function renderResultCards(items) {
+    resultsList.innerHTML = '';
+    const threshold = scoreThreshold ? parseInt(scoreThreshold.value) || 0 : 0;
+
+    items.forEach((item, i) => {
+      const scoreClass = item.score >= 70 ? 'high' : item.score >= 40 ? 'mid' : 'low';
+      const st = item.sourceType || 'other';
+      const stLabel = SOURCE_LABELS[st] || '기타';
+      const isBookmarked = bookmarks.some(b => b.link === item.link);
+      const below = threshold > 0 && item.score < threshold;
+
+      const card = document.createElement('div');
+      card.className = `result-card${below ? ' below-threshold' : ''}`;
+      card.style.animationDelay = `${i * 0.06}s`;
+      card.innerHTML = `
+        <div class="result-card-top">
+          <div class="result-info">
+            <div class="result-title-row">
+              <span class="source-badge ${st}">${stLabel}</span>
+              <div class="result-title">${escapeHtml(item.title)}</div>
+            </div>
+            <div class="result-url">${escapeHtml(item.link)}</div>
+          </div>
+          <div class="result-actions">
+            <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" title="북마크">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="${isBookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+            <div class="score-badge ${scoreClass}">
+              <span class="score-number">${item.score}</span>
+              <span class="score-label">신뢰도</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-snippet">${escapeHtml(item.snippet)}</div>
+        <div class="result-reason">
+          <svg class="result-reason-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
+          </svg>
+          <span>${escapeHtml(item.reason)}</span>
+        </div>
+        <div class="result-content-area">
+          <div class="result-content-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+            <span>웹 자료</span>
+            <span class="result-content-status">불러오는 중...</span>
+          </div>
+          <div class="result-content-body">
+            <div class="content-loading"><span></span><span></span><span></span></div>
+          </div>
+        </div>`;
+
+      card.addEventListener('click', e => {
+        if (e.target.closest('.bookmark-btn')) return;
+        if (e.target.closest('.content-more-btn')) return;
+        openInBrowser(item);
+      });
+
+      card.querySelector('.bookmark-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        toggleBookmark(item);
+        const btn = e.currentTarget;
+        const on = bookmarks.some(b => b.link === item.link);
+        btn.classList.toggle('active', on);
+        btn.querySelector('svg').setAttribute('fill', on ? 'currentColor' : 'none');
+      });
+
+      resultsList.appendChild(card);
+
+      // 본문 로딩 흉내
+      setTimeout(() => fillContent(card, item), 700 + i * 220);
+    });
+  }
+
+  function fillContent(card, item) {
+    const area = card.querySelector('.result-content-area');
+    if (!area) return;
+    const body = area.querySelector('.result-content-body');
+    const status = area.querySelector('.result-content-status');
+    const shown = item.content.slice(0, 3).map(p =>
+      `<p class="content-paragraph">${escapeHtml(p)}</p>`).join('');
+    const more = Math.max(0, item.paras - 3);
+    status.textContent = `${item.paras}개 단락`;
+    body.innerHTML =
+      `<span class="content-meta">${escapeHtml(item.date)}</span>` +
+      shown +
+      (more > 0 ? `<button class="content-more-btn">+${more}개 단락 더 보기</button>` : '');
+    const btn = body.querySelector('.content-more-btn');
+    if (btn) {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        btn.insertAdjacentHTML('beforebegin',
+          `<p class="content-paragraph">${escapeHtml(item.content[item.content.length - 1])}</p>` +
+          '<p class="content-paragraph">(이하 생략 — 데모 화면입니다.)</p>');
+        btn.remove();
+      });
+    }
+  }
+
+  searchBtn.addEventListener('click', () => doSearch(searchInput.value));
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.isComposing) doSearch(searchInput.value);
+  });
+  $('new-search-btn').addEventListener('click', () => {
+    splitContainer.classList.add('hidden');
+    closeBrowser(); closeChat();
+    searchHero.style.display = '';
+    searchInput.value = '';
+    searchInput.focus();
+  });
+
+  /* ───────── 출처 필터 ───────── */
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.dataset.filter;
+      filterBtns.forEach(b => b.classList.toggle('active', b === btn));
+      const filtered = activeFilter === 'all'
+        ? currentRanked
+        : currentRanked.filter(r => (r.sourceType || 'other') === activeFilter);
+      renderResultCards(filtered);
+    });
+  });
+
+  if (scoreThreshold) {
+    scoreThreshold.addEventListener('input', () => {
+      thresholdValue.textContent = scoreThreshold.value;
+    });
+  }
+  if (sortModeSelect) {
+    sortModeSelect.addEventListener('change', () => {
+      if (currentRanked.length) { currentRanked = applySorting(currentRanked); renderResultCards(currentRanked); }
+    });
+  }
+
+  /* ───────── 최근 검색 ───────── */
+  function addToHistory(q) {
+    searchHistory = [q, ...searchHistory.filter(h => h !== q)].slice(0, 15);
+    renderHistory();
+  }
+  function renderHistory() {
+    historyList.innerHTML = '';
+    clearHistoryBtn.classList.toggle('hidden', searchHistory.length === 0);
+    searchHistory.forEach(q => {
+      const li = document.createElement('li');
+      li.title = q;
+      li.innerHTML = `
+        <span class="history-text">${escapeHtml(q)}</span>
+        <button class="history-delete-btn" title="삭제">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>`;
+      li.querySelector('.history-text').addEventListener('click', () => {
+        navBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(t => t.classList.remove('active'));
+        document.querySelector('[data-tab="search"]').classList.add('active');
+        $('tab-search').classList.add('active');
+        searchInput.value = q;
+        doSearch(q);
+      });
+      li.querySelector('.history-delete-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        searchHistory = searchHistory.filter(h => h !== q);
+        renderHistory();
+      });
+      historyList.appendChild(li);
+    });
+  }
+  clearHistoryBtn.addEventListener('click', () => {
+    if (!searchHistory.length) return;
+    if (!confirm('최근 검색 기록을 모두 삭제하시겠습니까?')) return;
+    searchHistory = [];
+    renderHistory();
+  });
+
+  /* ───────── 오른쪽 문서 패널 (내장 브라우저 대체) ───────── */
+  function openInBrowser(item) {
+    closeChat();
+    browserUrl.textContent = item.link;
+    const view = $('browser-webview');
+    view.innerHTML = `
+      <article class="doc-view">
+        <h1>${escapeHtml(item.title)}</h1>
+        <div class="doc-meta">${escapeHtml(item.link)} · ${escapeHtml(item.date)}</div>
+        ${item.content.map(p => `<p>${escapeHtml(p)}</p>`).join('')}
+        <p class="doc-note">※ 오프라인 데모 화면입니다. 실제 웹 페이지를 불러오지 않습니다.</p>
+      </article>`;
+    view.scrollTop = 0;
+    browserPanel.classList.remove('hidden');
+  }
+  function closeBrowser() { browserPanel.classList.add('hidden'); }
+  $('browser-close').addEventListener('click', closeBrowser);
+  ['browser-back', 'browser-forward', 'browser-reload', 'browser-external'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('click', e => e.preventDefault());
+  });
+
+  /* ───────── AI 채팅 (분할 뷰) ───────── */
+  function openChat() {
+    closeBrowser();
+    chatPanel.classList.remove('hidden');
+    chatInput.focus();
+  }
+  function closeChat() { chatPanel.classList.add('hidden'); }
+  $('open-chat-btn').addEventListener('click', openChat);
+  $('chat-close').addEventListener('click', closeChat);
+  $('low-quality-chat-btn').addEventListener('click', openChat);
+  $('low-quality-dismiss').addEventListener('click', () => lowQualityBanner.classList.add('hidden'));
+
+  function resetChatPanel() {
+    chatMessages.innerHTML = `
+      <div class="chat-welcome">
+        <div class="chat-welcome-icon">&#x1F50D;</div>
+        <p>검색 결과에 대해 궁금한 점을 물어보세요!</p>
+        <div class="chat-suggestions">
+          <button class="chat-suggest-btn">이 결과들의 핵심 차이점은?</button>
+          <button class="chat-suggest-btn">가장 신뢰할 수 있는 정보는?</button>
+          <button class="chat-suggest-btn">이 주제에 대해 더 자세히 설명해줘</button>
+        </div>
+      </div>`;
+    bindSuggestions();
+  }
+  function bindSuggestions() {
+    chatMessages.querySelectorAll('.chat-suggest-btn').forEach(b => {
+      b.addEventListener('click', () => sendChat(b.textContent.trim()));
+    });
+  }
+  bindSuggestions();
+
+  function appendChat(type, text) {
+    const welcome = chatMessages.querySelector('.chat-welcome');
+    if (welcome) welcome.remove();
+    const el = document.createElement('div');
+    el.className = `chat-msg ${type}`;
+    if (type === 'user') {
+      el.innerHTML = `<div class="chat-msg-content"><div>${escapeHtml(text)}</div></div>`;
+    } else {
+      let html = escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      el.innerHTML = `<div class="chat-msg-avatar">&#x1F50D;</div><div class="chat-msg-content">${html}</div>`;
+    }
+    chatMessages.appendChild(el);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return el;
+  }
+
+  function sendChat(msg) {
+    msg = (msg || '').trim();
+    if (!msg) return;
+    appendChat('user', msg);
+    chatInput.value = '';
+    const loading = document.createElement('div');
+    loading.className = 'chat-msg ai loading';
+    loading.innerHTML = '<div class="chat-msg-content"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+    chatMessages.appendChild(loading);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    setTimeout(() => {
+      loading.remove();
+      appendChat('ai', answerAt(chatIdx++));
+    }, 900);
+  }
+  chatSend.addEventListener('click', () => sendChat(chatInput.value));
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.isComposing) sendChat(chatInput.value);
+  });
+  $('chat-clear').addEventListener('click', resetChatPanel);
+
+  /* ───────── 독립 채팅 탭 ───────── */
+  function appendStandalone(type, text) {
+    const welcome = standaloneMessages.querySelector('.standalone-chat-welcome');
+    if (welcome) welcome.remove();
+    const el = document.createElement('div');
+    el.className = `standalone-msg ${type}`;
+    if (type === 'user') {
+      el.innerHTML = `<div class="standalone-msg-content"><div>${escapeHtml(text)}</div></div>`;
+    } else {
+      let html = escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      el.innerHTML = `<div class="standalone-msg-avatar">&#x1F50D;</div><div class="standalone-msg-content">${html}</div>`;
+    }
+    standaloneMessages.appendChild(el);
+    standaloneMessages.scrollTop = standaloneMessages.scrollHeight;
+  }
+  function sendStandalone(msg) {
+    msg = (msg || '').trim();
+    if (!msg) return;
+    appendStandalone('user', msg);
+    standaloneInput.value = '';
+    const loading = document.createElement('div');
+    loading.className = 'standalone-msg ai';
+    loading.innerHTML = '<div class="standalone-msg-avatar">&#x1F50D;</div><div class="standalone-msg-content"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+    standaloneMessages.appendChild(loading);
+    standaloneMessages.scrollTop = standaloneMessages.scrollHeight;
+    setTimeout(() => {
+      loading.remove();
+      appendStandalone('ai', answerAt(standaloneIdx++));
+    }, 900);
+  }
+  standaloneSend.addEventListener('click', () => sendStandalone(standaloneInput.value));
+  standaloneInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.isComposing) sendStandalone(standaloneInput.value);
+  });
+  document.querySelectorAll('.standalone-suggest-btn').forEach(b => {
+    b.addEventListener('click', () => sendStandalone(b.dataset.q || b.textContent.trim()));
+  });
+  $('standalone-chat-clear').addEventListener('click', () => {
+    standaloneIdx = 0;
+    standaloneMessages.innerHTML = `
+      <div class="standalone-chat-welcome">
+        <div class="standalone-chat-welcome-icon">&#x1F50D;</div>
+        <h2 class="standalone-chat-title">AI 어시스턴트</h2>
+        <p class="standalone-chat-desc">무엇이든 물어보세요! 궁금한 것을 AI가 답변해드립니다.</p>
+        <div class="standalone-chat-suggestions">
+          <button class="standalone-suggest-btn" data-q="오늘의 주요 뉴스를 알려줘">오늘의 주요 뉴스를 알려줘</button>
+          <button class="standalone-suggest-btn" data-q="프로그래밍에 대해 질문하고 싶어">프로그래밍에 대해 질문하고 싶어</button>
+          <button class="standalone-suggest-btn" data-q="글쓰기를 도와줘">글쓰기를 도와줘</button>
+          <button class="standalone-suggest-btn" data-q="복잡한 개념을 쉽게 설명해줘">복잡한 개념을 쉽게 설명해줘</button>
+        </div>
+      </div>`;
+    standaloneMessages.querySelectorAll('.standalone-suggest-btn').forEach(b => {
+      b.addEventListener('click', () => sendStandalone(b.dataset.q));
+    });
+  });
+  const modelInfo = $('standalone-model-info');
+  if (modelInfo) modelInfo.textContent = 'Qwen/Qwen2.5-72B-Instruct';
+
+  /* ───────── 북마크 ───────── */
+  function toggleBookmark(item) {
+    const i = bookmarks.findIndex(b => b.link === item.link);
+    if (i >= 0) bookmarks.splice(i, 1);
+    else bookmarks.push({ ...item, collection: '기본' });
+  }
+  function renderBookmarks() {
+    const list = $('bookmarks-list');
+    if (!bookmarks.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>저장된 북마크가 없습니다</p>
+          <span>검색 결과에서 북마크 아이콘을 눌러 저장하세요</span>
+        </div>`;
+      return;
+    }
+    list.innerHTML = '';
+    bookmarks.forEach(item => {
+      const scoreClass = item.score >= 70 ? 'high' : item.score >= 40 ? 'mid' : 'low';
+      const st = item.sourceType || 'other';
+      const card = document.createElement('div');
+      card.className = 'result-card bookmark-card';
+      card.innerHTML = `
+        <div class="result-card-top">
+          <div class="result-info">
+            <div class="result-title-row">
+              <span class="source-badge ${st}">${SOURCE_LABELS[st]}</span>
+              <div class="result-title">${escapeHtml(item.title)}</div>
+            </div>
+            <div class="result-url">${escapeHtml(item.link)}</div>
+          </div>
+          <div class="result-actions">
+            <button class="bookmark-btn active" title="북마크 해제">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+            <div class="score-badge ${scoreClass}">
+              <span class="score-number">${item.score}</span>
+              <span class="score-label">신뢰도</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-snippet">${escapeHtml(item.snippet)}</div>`;
+      card.querySelector('.bookmark-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        toggleBookmark(item);
+        renderBookmarks();
+      });
+      list.appendChild(card);
+    });
+  }
+  const addCol = $('add-collection-btn');
+  if (addCol) addCol.addEventListener('click', () => {
+    const name = prompt('새 컬렉션 이름');
+    if (!name) return;
+    const sel = $('collection-select');
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = name;
+    sel.appendChild(opt);
+    sel.value = name;
+  });
+
+  /* ───────── 통계 ───────── */
+  function renderStats() {
+    const ranked = currentRanked.length ? currentRanked : RESULTS;
+    const total = ranked.length * Math.max(1, searchCount);
+    const avg = Math.round(ranked.reduce((s, r) => s + r.score, 0) / ranked.length);
+
+    $('stat-total-searches').textContent = searchCount;
+    $('stat-avg-score').textContent = searchCount ? avg : '-';
+    $('stat-total-results').textContent = searchCount ? total : 0;
+    $('stat-bookmarks').textContent = bookmarks.length;
+
+    const sourceColors = {
+      official: '#4ade80', news: '#60a5fa', academic: '#a78bfa',
+      blog: '#fbbf24', community: '#f472b6', other: '#94a3b8'
+    };
+    const totals = {};
+    ranked.forEach(r => { const k = r.sourceType || 'other'; totals[k] = (totals[k] || 0) + 1; });
+    const max = Math.max(...Object.values(totals), 1);
+    $('source-chart').innerHTML = '<div class="bar-chart">' + Object.entries(totals)
+      .sort((a, b) => b[1] - a[1]).map(([k, v]) => `
+        <div class="bar-row">
+          <span class="bar-label">${SOURCE_LABELS[k] || k}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${(v / max) * 100}%;background:${sourceColors[k] || '#888'}"></div></div>
+          <span class="bar-value">${v}</span>
+        </div>`).join('') + '</div>';
+
+    const buckets = { '80-100': 0, '60-79': 0, '40-59': 0, '0-39': 0 };
+    ranked.forEach(r => {
+      if (r.score >= 80) buckets['80-100']++;
+      else if (r.score >= 60) buckets['60-79']++;
+      else if (r.score >= 40) buckets['40-59']++;
+      else buckets['0-39']++;
+    });
+    const bColors = { '80-100': '#4ade80', '60-79': '#60a5fa', '40-59': '#fbbf24', '0-39': '#f87171' };
+    const bMax = Math.max(...Object.values(buckets), 1);
+    $('score-chart').innerHTML = '<div class="bar-chart">' + Object.entries(buckets).map(([k, v]) => `
+      <div class="bar-row">
+        <span class="bar-label">${k}점</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v / bMax) * 100}%;background:${bColors[k]}"></div></div>
+        <span class="bar-value">${v}회</span>
+      </div>`).join('') + '</div>';
+
+    $('keyword-chart').innerHTML = searchHistory.length
+      ? '<div class="keyword-tags">' + searchHistory.slice(0, 10).map(q =>
+          `<span class="keyword-tag">${escapeHtml(q)}<span class="tag-count">1</span></span>`).join('') + '</div>'
+      : '<p class="settings-desc">아직 검색 기록이 없습니다.</p>';
+
+    $('trend-chart').innerHTML = searchHistory.length
+      ? '<div class="trend-chart-canvas">' + searchHistory.slice(0, 10).reverse().map(q => `
+          <div class="trend-bar-wrapper" title="${escapeHtml(q)}">
+            <div class="trend-bar" style="height:${avg}%"></div>
+          </div>`).join('') + '</div>'
+      : '<p class="settings-desc">아직 검색 기록이 없습니다.</p>';
+  }
+
+  /* ───────── 설정 기타 ───────── */
+  const toggleKey = $('toggle-key');
+  if (toggleKey) toggleKey.addEventListener('click', () => {
+    const inp = $('ai-api-key');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+  const hfModel = $('hf-model');
+  if (hfModel) hfModel.addEventListener('change', () => {
+    $('custom-model-group').classList.toggle('hidden', hfModel.value !== 'custom');
+  });
+  const autoEnabled = $('auto-search-enabled');
+  if (autoEnabled) autoEnabled.addEventListener('change', () => {
+    $('auto-search-options').classList.toggle('hidden', !autoEnabled.checked);
+  });
+  const saveBtn = $('save-settings-btn');
+  if (saveBtn) saveBtn.addEventListener('click', () => {
+    const st = $('save-status');
+    st.textContent = '저장되었습니다';
+    setTimeout(() => { st.textContent = ''; }, 2000);
+  });
+  const runNow = $('auto-search-run-now');
+  if (runNow) runNow.addEventListener('click', () => {
+    const st = $('auto-search-status');
+    st.textContent = '실행 중...';
+    setTimeout(() => { st.textContent = '완료'; }, 1200);
+  });
+  const hfHelp = $('hf-help-link');
+  if (hfHelp) hfHelp.addEventListener('click', e => e.preventDefault());
+
+  renderHistory();
+  searchInput.focus();
+})();
+
+</script>
+</body>
+</html>
